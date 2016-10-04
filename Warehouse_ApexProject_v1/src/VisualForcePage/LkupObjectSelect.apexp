@@ -1,0 +1,26 @@
+<apex:page showHeader="false" controller="SearchObjectController" sidebar="false" action="{!init}">
+<script type="text/javascript">
+	var parentDoc = window.opener;
+	function selectRecord(objId,objName){
+		parentDoc.setIdAndName(objId,objName);
+		window.close();
+	}
+</script>
+<apex:form >
+<apex:pageMessages />
+<apex:pageBlock >
+	<apex:inputText value="{!srchTxt}"/>
+	<apex:commandButton value="Search" action="{!filterRows}"/>
+	<apex:pageBlockTable value="{!results}" var="row" id="theResults">
+
+		<apex:column headerValue="Representative">
+			<a href="#" onClick="selectRecord('{!row.contact.Id}','{!row.contact.Name}')">{!row.contact.Name}</a>
+		</apex:column>
+		<apex:column headerValue="Account Number" value="{!row.contact.ACCT_NR__c}"/>
+		<apex:column headerValue="{!$Label.Title}" value="{!row.title}"/>
+		<apex:column headerValue="{!$Label.Home_Phone}" value="{!row.contact.Phone}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:form>
+</apex:page>
+                            	

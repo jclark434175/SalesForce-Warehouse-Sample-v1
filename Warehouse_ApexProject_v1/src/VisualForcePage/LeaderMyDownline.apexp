@@ -1,0 +1,10 @@
+<apex:page showHeader="false" sidebar="false" controller="MyDownlineController" action="{!init}">
+	<apex:composition template="LeaderPageTemplate">
+	
+			<apex:define name="content">
+				<c:Genealogy repAcctNbr="{!repAcctNbr}"
+							 impersonate="false"/>
+			</apex:define>
+	</apex:composition>
+</apex:page>
+                            	

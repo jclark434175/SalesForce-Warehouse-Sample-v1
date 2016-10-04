@@ -1,0 +1,378 @@
+<!-- Modified by Snehashis Ghosh on 11/13/2009 ; Code Modified to build up Download page functionality. -->
+<apex:page showHeader="false" sidebar="false" controller="LdrAnalysisController" action="{!init}"
+            cache="true" contenttype="{!IF($CurrentPage.parameters.download='1','contentType=application/vnd.ms-excel#LdrDownlineAnalysis.xls','')}">
+    <apex:outputPanel rendered="{!LEN($CurrentPage.parameters.download)=0}">
+    <apex:composition template="LeaderPageTemplate">
+        <apex:define name="content">
+        <table width="880" border="0" cellspacing="0" cellpadding="1">
+              <tr>
+                <td colspan="2" height="5"></td>
+              </tr>
+          <tr align="left" valign="top">
+            <td width="572">
+                <table width="100%" border="0" cellspacing="0" cellpadding="1">
+                  <tr>
+                    <td width="572">
+                        <table width="572" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="190">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Orders','images/header_sel_left.gif','images/table_left_edge.gif')))}"></td>
+                                        <td width="88%" nowrap background="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Orders','images/header_background_sel.gif','images/header_background.gif')))}" class="table_heading">
+                                        <a href="/apex/LdrDownlineAnalysis?pgId={!$CurrentPage.parameters.pgId}&debugLdr=1&repAcctNbr={!$CurrentPage.parameters.repAcctNbr}&section=Orders">{!$Label.Orders}</a>
+                                        </td>
+                                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Orders','images/header_sel_right.gif','images/table_right_edge.gif')))}"></td>
+                                        <td width="2%" nowrap></td>
+                                      </tr>
+                                      </table>                
+                                </td>
+                                <td width="190">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Sales','images/header_sel_left.gif','images/table_left_edge.gif')))}"></td>
+                                        <td width="88%" nowrap background="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Sales','images/header_background_sel.gif','images/header_background.gif')))}" class="table_heading">
+                                        <a href="/apex/LdrDownlineAnalysis?pgId={!$CurrentPage.parameters.pgId}&debugLdr=1&repAcctNbr={!$CurrentPage.parameters.repAcctNbr}&section=Sales">{!$Label.Sales}</a>
+                                        </td>
+                                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Sales','images/header_sel_right.gif','images/table_right_edge.gif')))}"></td>
+                                        <td width="2%" nowrap></td>
+                                      </tr>
+                                      </table>                
+                                </td>
+                                <td width="190">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Current Business','images/header_sel_left.gif','images/table_left_edge.gif')))}"></td>
+                                        <td width="88%" nowrap background="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Current Business','images/header_background_sel.gif','images/header_background.gif')))}" class="table_heading">
+                                        <a href="/apex/LdrDownlineAnalysis?pgId={!$CurrentPage.parameters.pgId}&debugLdr=1&repAcctNbr={!$CurrentPage.parameters.repAcctNbr}&section=Current Business">{!$Label.Current_Business}</a>
+                                        </td>
+                                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Current Business','images/header_sel_right.gif','images/table_right_edge.gif')))}"></td>
+                                        <td width="2%" nowrap></td>
+                                      </tr>
+                                      </table>                 
+                                </td>
+                          </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                    <!-- Zishan Change 10/08/2009 Height from 470 to 460 
+                    <div class="table_with_scrolls" style="height:470px;width:595px">-->
+                        <div class="table_with_scrolls" style="height:460px;width:595px">
+                            <table width="572" border="0" cellspacing="0" cellpadding="0">
+                                <apex:repeat value="{!blockList}" var="block">
+                                  <tr>
+                                    <td>
+                                        <table width="572" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td class="first_block_heading">
+                                                <apex:outputText value="{!$Label.Key_Info}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Additional_Info}" rendered="{!block.blockName = 'Additional Info'}" />
+                                                <apex:outputText value="{!$Label.Generation}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.Generation}" rendered="{!block.blockName = 'On Hold'}" />
+                                                <apex:outputText value="{!$Label.Market}" rendered="{!block.blockName = 'Orders-Market Tags'}" />
+                                                <apex:outputText value="{!$Label.Market}" rendered="{!block.blockName = 'Sales-Market Tags'}" />
+                                                <apex:outputText value="{!$Label.Market}" rendered="{!block.blockName = 'Business-Market Tags'}" />
+                                                <apex:outputText value="{!$Label.Downline}" rendered="{!block.blockName = 'Downline Sales'}" />
+                                                <!--Zishan Change 9/3/09 <apex:outputText value="{!$Label.Generation}" rendered="{!block.blockName = 'Downline Balance'}" />-->
+                                                <apex:outputText value="{!$Label.Balance_by_Genearation}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Sales_Over_Minimum}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.Title} " rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="({!$Label.Close_of_Last_Campaign})" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="{!$Label.Downline}" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.Potential_Inactive}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                <apex:outputText value="{!$Label.PATD_Certified}" rendered="{!block.blockName = 'PATD Certified'}" />
+                                                <apex:outputText value="{!$Label.President_Club_Level}" rendered="{!block.blockName = 'Presidents Club Level'}" />
+                                                <apex:outputText value="{!$Label.Downline_Next_10_days}" rendered="{!block.blockName = 'Anniversary & Birthday'}" />
+                                            </td>
+                                            <td class="block_heading">
+                                                <apex:outputPanel rendered="{!block.col1Enabled}">
+                                                <apex:outputText value="{!$Label.Current_Campaign}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Current_Campaign}" rendered="{!block.blockName = 'Additional Info'}" />
+                                                <apex:outputText value="{!$Label.Received}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.Next_Campaign}" rendered="{!block.blockName = 'On Hold'}" />
+                                                <apex:outputText value="{!$Label.Current_Campaign}" rendered="{!block.blockName = 'Downline Sales'}" />
+                                                <apex:outputText value="{!$Label.Current_Balance}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Downline}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.At_Risk}" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="{!$Label.Additions}" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.1_Campaign}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                <apex:outputText value="{!$Label.Yes}" rendered="{!block.blockName = 'PATD Certified'}" />
+                                                <apex:outputText value="{!$Label.Yes}" rendered="{!block.blockName = 'Presidents Club Level'}" />
+                                                <apex:outputText value="{!$Label.Anniversary}" rendered="{!block.blockName = 'Anniversary & Birthday'}" />
+                                                </apex:outputPanel>
+                                            </td>
+                                             <td class="block_heading">
+                                                <apex:outputPanel rendered="{!block.col2Enabled}">
+                                                <apex:outputText value="{!$Label.Prior_Campaign}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Prior_Campaign}" rendered="{!block.blockName = 'Additional Info'}" />
+                                                <apex:outputText value="{!$Label.Below_Minimum}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.On_Hold}" rendered="{!block.blockName = 'On Hold'}" />
+                                                <apex:outputText value="{!$Label.Prior_Campaign}" rendered="{!block.blockName = 'Downline Sales'}" />
+                                                <apex:outputText value="{!$Label.Past_Due_Amount}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Personal}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.Next}" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="{!$Label.Removals}" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.2_Campaigns}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                <apex:outputText value="{!$Label.No}" rendered="{!block.blockName = 'PATD Certified'}" />
+                                                <apex:outputText value="{!$Label.No}" rendered="{!block.blockName = 'Presidents Club Level'}" />
+                                                <apex:outputText value="{!$Label.Birthday}" rendered="{!block.blockName = 'Anniversary & Birthday'}" />
+                                                </apex:outputPanel>
+                                            </td>
+                                             <td class="block_heading">
+                                                <apex:outputPanel rendered="{!block.col3Enabled}">
+                                                <!--Zishan Added Next Campaign Label 08/11/2009-->
+                                                <apex:outputText value="{!$Label.Next_Campaign}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Pending}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.Bad_Debt}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Group}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.Promoted}" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="+ / -" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.3_Campaigns}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                </apex:outputPanel>
+                                            </td>
+                                          </tr>
+                                          <apex:repeat value="{!block.blockRows}" var="row">
+                                              <tr class="{!IF(row.oddRow,'display_row_odd','display_row_even')}" align="left">
+                                                <td width="218" class="data_cell" align="left">
+                                                    <apex:outputPanel rendered="{!row.ReportId !=null}">
+                                                        <a href='/apex/DrilldownReport?pgId=101&rptId={!row.reportId}&retPgId={!$CurrentPage.parameters.pgId}&section={!section}&recCnt={!row.busRec.CC_Cnt__c}'>
+                                                    </apex:outputPanel>
+                                                    <apex:outputText value="{!$Label.Unqualified}" rendered="{!row.busRec.Row_Label__c = 'Title Level UQ'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!row.busRec.Row_Label__c = 'Orders Not Submitted'}" />
+                                                    <apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!row.busRec.Row_Label__c = 'Orders on Hold'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!row.busRec.Row_Label__c = 'Orders Under Minimum'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Achieving_Minimum}" rendered="{!row.busRec.Row_Label__c = 'Orders Achieving Minimum'}" />
+                                                    <apex:outputText value="{!$Label.Pending_Orders}" rendered="{!row.busRec.Row_Label__c = 'Pending Orders'}" />
+                                                    <apex:outputText value="{!$Label.Orders_with_Multiples}" rendered="{!row.busRec.Row_Label__c = 'Orders with Multiples'}" />
+                                                    <apex:outputText value="{!$Label.Total_Orders_Received}" rendered="{!row.busRec.Row_Label__c = 'Total Orders Received'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_1}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 1'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_2}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 2'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_3}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 3'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_4}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 4'}" />
+                                                    <apex:outputText value="{!$Label.New_Representative_1st_Order}" rendered="{!row.busRec.Row_Label__c = 'New Representative 1st Order'}" />
+                                                    <apex:outputText value="{!$Label.Return_Orders}" rendered="{!row.busRec.Row_Label__c = 'Return Orders'}" />
+                                                    <apex:outputText value="{!$Label.Brochures_Not_Purchased}" rendered="{!row.busRec.Row_Label__c = 'Brochures Not Purchased'}" />
+                                                    <apex:outputText value="{!$Label.Demonstration_Items_not_Purchased}" rendered="{!row.busRec.Row_Label__c = 'Demonstration Items Not Purchased'}" />
+                                                    <apex:outputText value="{!$Label.Average_Customers}" rendered="{!row.busRec.Row_Label__c = 'Average Customers'}" />
+                                                    <apex:outputText value="{!$Label.1st_Generation}" rendered="{!row.busRec.Row_Label__c = '1st Generation'}" />
+                                                    <apex:outputText value="{!$Label.2nd_Generation}" rendered="{!row.busRec.Row_Label__c = '2nd Generation'}" />
+                                                    <apex:outputText value="{!$Label.3rd_Generation}" rendered="{!row.busRec.Row_Label__c = '3rd Generation'}" />
+                                                    <apex:outputText value="{!$Label.Total}" rendered="{!AND(row.busRec.Row_Label__c = 'Total',block.blockName!='Titles')}" />
+                                                    <apex:outputText value="{!$Label.View_Current_Campaign}" rendered="{!AND(row.busRec.Row_Label__c='Total',block.blockName='Titles')}"/> 
+                                                    <apex:outputText value="{!$Label.Total_Award_Sales}" rendered="{!row.busRec.Row_Label__c = 'Total Award Sales'}" />
+                                                    <apex:outputText value="{!$Label.Award_Sales_Below_Minimum}" rendered="{!row.busRec.Row_Label__c = 'Award Sales - Below Minimum'}" />
+                                                    <apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.busRec.Row_Label__c = 'Net Sales'}" />
+                                                    <apex:outputText value="{!$Label.Average_Order_with_Multiples}" rendered="{!row.busRec.Row_Label__c = 'Average Order with Multiples'}" />
+                                                    <apex:outputText value="{!$Label.Return_net_sales}" rendered="{!row.busRec.Row_Label__c = 'Return Net Sales'}" />
+                                                    <apex:outputText value="{!$Label.Non_Leader}" rendered="{!row.busRec.Row_Label__c = 'Non-Leader'}" />
+                                                    <apex:outputText value="{!row.busRec.Row_Label__c}" rendered="{!OR(row.busRec.Is_Market_Tag__c,row.busRec.Is_Title_Tag__c)}" />
+                                                    
+                                                    <apex:outputPanel rendered="{!row.ReportId !=null}">
+                                                     </a>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!AND(row.busRec.Row_Label__c='Total',block.blockName='Titles')}">
+                                                    ({!$Label.Current_Campaign})
+                                                    </apex:outputPanel>
+                                                </td>
+                                                    
+                                                <td width="118" class="data_cell" >
+                                                    <apex:outputField value="{!row.busRec.CC_Cnt__c}"/> 
+                                                    <apex:outputField value="{!row.busRec.CC_Amt__c}"/> 
+                                                    <apex:outputText value="{!row.busRec.CC_Txt__c}"/>                          
+                                                </td>
+                                                <td width="118" class="data_cell" >
+                                                    <apex:outputField value="{!row.busRec.PC_Cnt__c}"/> 
+                                                    <apex:outputField value="{!row.busRec.PC_Amt__c}"/> 
+                                                    <apex:outputText value="{!row.busRec.PC_Txt__c}"/>                          
+                                                
+                                                </td>
+                                                <td width="118" class="data_cell">
+                                                    <apex:outputField value="{!row.busRec.NC_Cnt__c}"/> 
+                                                    <apex:outputField value="{!row.busRec.NC_Amt__c}"/> 
+                                                    <apex:outputText value="{!row.busRec.NC_Txt__c}"/>                          
+                                                
+                                                </td>
+                                              </tr>
+                                          </apex:repeat>
+                                        </table>
+                                    </td>
+                                  </tr>
+                              </apex:repeat>
+                            </table>
+                        </div>
+                    </td>
+                  </tr>
+                </table>
+            </td>
+             </td>
+            <td width="15">
+            </td>
+            <td width="400" align="left" border="0" cellspacing="0" cellpadding="0">
+                <iframe src="/apex/MyActionItems" FRAMEBORDER="0" height="240" width="365" border="0"></iframe>
+
+                <c:MarketReportLinks marketId="{!currUsr.MRKT_ID__c}"
+                                     rpt2Display="-None-"/>                                
+            </td>
+          </tr>
+            </table>
+        </apex:define>
+    </apex:composition>
+    </apex:outputPanel>
+    <!-- Added by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+    <apex:outputPanel rendered="{!$CurrentPage.parameters.download='1'}">
+        <table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Name}: <b>{!$User.FirstName} {!$User.FirstName}</b></td>
+    </tr>
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Last_Updated} (dd/MM): <b> 
+	    	<apex:outputText value="{0,date,dd / MM}">
+	    		<apex:param value="{!TODAY()}"/>
+    		</apex:outputText>
+    		</b>
+    	</td>
+    </tr>
+    <tr>
+    <td contenttype="application/vnd.ms-excel"> </td>
+    </tr>
+	</table>
+    <table border="0">
+                     <apex:repeat value="{!blockList}" var="block">
+                      <tr>
+                      <td>
+                      <table border="0">
+                       <tr>
+                       <td contenttype="application/vnd.ms-excel">
+                                                <apex:outputText value="{!$Label.Key_Info}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Additional_Info}" rendered="{!block.blockName = 'Additional Info'}" />
+                                                <apex:outputText value="{!$Label.Generation}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.Generation}" rendered="{!block.blockName = 'On Hold'}" />
+                                                <apex:outputText value="{!$Label.Market}" rendered="{!block.blockName = 'Orders-Market Tags'}" />
+                                                <apex:outputText value="{!$Label.Market}" rendered="{!block.blockName = 'Sales-Market Tags'}" />
+                                                <apex:outputText value="{!$Label.Market}" rendered="{!block.blockName = 'Business-Market Tags'}" />
+                                                <apex:outputText value="{!$Label.Downline}" rendered="{!block.blockName = 'Downline Sales'}" />
+                                                <!--Zishan Change 9/3/09 <apex:outputText value="{!$Label.Generation}" rendered="{!block.blockName = 'Downline Balance'}" />-->
+                                                <apex:outputText value="{!$Label.Balance_by_Genearation}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Sales_Over_Minimum}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.Title} " rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="({!$Label.Close_of_Last_Campaign})" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="{!$Label.Downline}" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.Potential_Inactive}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                <apex:outputText value="{!$Label.PATD_Certified}" rendered="{!block.blockName = 'PATD Certified'}" />
+                                                <apex:outputText value="{!$Label.President_Club_Level}" rendered="{!block.blockName = 'Presidents Club Level'}" />
+                                                <apex:outputText value="{!$Label.Downline_Next_10_days}" rendered="{!block.blockName = 'Anniversary & Birthday'}" />
+                                            </td>
+                                            <td contenttype="application/vnd.ms-excel">
+                                                <apex:outputPanel rendered="{!block.col1Enabled}">
+                                                <apex:outputText value="{!$Label.Current_Campaign}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Current_Campaign}" rendered="{!block.blockName = 'Additional Info'}" />
+                                                <apex:outputText value="{!$Label.Received}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.Next_Campaign}" rendered="{!block.blockName = 'On Hold'}" />
+                                                <apex:outputText value="{!$Label.Current_Campaign}" rendered="{!block.blockName = 'Downline Sales'}" />
+                                                <apex:outputText value="{!$Label.Current_Balance}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Downline}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.At_Risk}" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="{!$Label.Additions}" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.1_Campaign}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                <apex:outputText value="{!$Label.Yes}" rendered="{!block.blockName = 'PATD Certified'}" />
+                                                <apex:outputText value="{!$Label.Yes}" rendered="{!block.blockName = 'Presidents Club Level'}" />
+                                                <apex:outputText value="{!$Label.Anniversary}" rendered="{!block.blockName = 'Anniversary & Birthday'}" />
+                                                </apex:outputPanel>
+                                            </td>
+                                             <td contenttype="application/vnd.ms-excel">
+                                                <apex:outputPanel rendered="{!block.col2Enabled}">
+                                                <apex:outputText value="{!$Label.Prior_Campaign}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Prior_Campaign}" rendered="{!block.blockName = 'Additional Info'}" />
+                                                <apex:outputText value="{!$Label.Below_Minimum}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.On_Hold}" rendered="{!block.blockName = 'On Hold'}" />
+                                                <apex:outputText value="{!$Label.Prior_Campaign}" rendered="{!block.blockName = 'Downline Sales'}" />
+                                                <apex:outputText value="{!$Label.Past_Due_Amount}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Personal}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.Next}" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="{!$Label.Removals}" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.2_Campaigns}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                <apex:outputText value="{!$Label.No}" rendered="{!block.blockName = 'PATD Certified'}" />
+                                                <apex:outputText value="{!$Label.No}" rendered="{!block.blockName = 'Presidents Club Level'}" />
+                                                <apex:outputText value="{!$Label.Birthday}" rendered="{!block.blockName = 'Anniversary & Birthday'}" />
+                                                </apex:outputPanel>
+                                            </td>
+                                             <td contenttype="application/vnd.ms-excel">
+                                                <apex:outputPanel rendered="{!block.col3Enabled}">
+                                                <!--Zishan Added Next Campaign Label 08/11/2009-->
+                                                <apex:outputText value="{!$Label.Next_Campaign}" rendered="{!block.blockName = 'Key Info'}" />
+                                                <apex:outputText value="{!$Label.Pending}" rendered="{!block.blockName = 'Order Status'}" />
+                                                <apex:outputText value="{!$Label.Bad_Debt}" rendered="{!block.blockName = 'Downline Balance'}" />
+                                                <apex:outputText value="{!$Label.Group}" rendered="{!block.blockName = 'Sales over Minimum'}" />
+                                                <apex:outputText value="{!$Label.Promoted}" rendered="{!block.blockName = 'Titles'}" />
+                                                <apex:outputText value="+ / -" rendered="{!block.blockName = 'Additions-Removals'}" />
+                                                <apex:outputText value="{!$Label.3_Campaigns}" rendered="{!block.blockName = 'Potential Inactive'}" />
+                                                </apex:outputPanel>
+                                            </td>
+                                          </tr>
+                                          <apex:repeat value="{!block.blockRows}" var="row">
+                                              <tr>
+                                                <td contenttype="application/vnd.ms-excel">
+                                                    <apex:outputText value="{!$Label.Unqualified}" rendered="{!row.busRec.Row_Label__c = 'Title Level UQ'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!row.busRec.Row_Label__c = 'Orders Not Submitted'}" />
+                                                    <apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!row.busRec.Row_Label__c = 'Orders on Hold'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!row.busRec.Row_Label__c = 'Orders Under Minimum'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Achieving_Minimum}" rendered="{!row.busRec.Row_Label__c = 'Orders Achieving Minimum'}" />
+                                                    <apex:outputText value="{!$Label.Pending_Orders}" rendered="{!row.busRec.Row_Label__c = 'Pending Orders'}" />
+                                                    <apex:outputText value="{!$Label.Orders_with_Multiples}" rendered="{!row.busRec.Row_Label__c = 'Orders with Multiples'}" />
+                                                    <apex:outputText value="{!$Label.Total_Orders_Received}" rendered="{!row.busRec.Row_Label__c = 'Total Orders Received'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_1}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 1'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_2}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 2'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_3}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 3'}" />
+                                                    <apex:outputText value="{!$Label.Orders_Received_Week_4}" rendered="{!row.busRec.Row_Label__c = 'Orders Received Week 4'}" />
+                                                    <apex:outputText value="{!$Label.New_Representative_1st_Order}" rendered="{!row.busRec.Row_Label__c = 'New Representative 1st Order'}" />
+                                                    <apex:outputText value="{!$Label.Return_Orders}" rendered="{!row.busRec.Row_Label__c = 'Return Orders'}" />
+                                                    <apex:outputText value="{!$Label.Brochures_Not_Purchased}" rendered="{!row.busRec.Row_Label__c = 'Brochures Not Purchased'}" />
+                                                    <apex:outputText value="{!$Label.Demonstration_Items_not_Purchased}" rendered="{!row.busRec.Row_Label__c = 'Demonstration Items Not Purchased'}" />
+                                                    <apex:outputText value="{!$Label.Average_Customers}" rendered="{!row.busRec.Row_Label__c = 'Average Customers'}" />
+                                                    <apex:outputText value="{!$Label.1st_Generation}" rendered="{!row.busRec.Row_Label__c = '1st Generation'}" />
+                                                    <apex:outputText value="{!$Label.2nd_Generation}" rendered="{!row.busRec.Row_Label__c = '2nd Generation'}" />
+                                                    <apex:outputText value="{!$Label.3rd_Generation}" rendered="{!row.busRec.Row_Label__c = '3rd Generation'}" />
+                                                    <apex:outputText value="{!$Label.Total}" rendered="{!AND(row.busRec.Row_Label__c = 'Total',block.blockName!='Titles')}" />
+                                                    <apex:outputText value="{!$Label.View_Current_Campaign}" rendered="{!AND(row.busRec.Row_Label__c='Total',block.blockName='Titles')}"/> 
+                                                    <apex:outputText value="{!$Label.Total_Award_Sales}" rendered="{!row.busRec.Row_Label__c = 'Total Award Sales'}" />
+                                                    <apex:outputText value="{!$Label.Award_Sales_Below_Minimum}" rendered="{!row.busRec.Row_Label__c = 'Award Sales - Below Minimum'}" />
+                                                    <apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.busRec.Row_Label__c = 'Net Sales'}" />
+                                                    <apex:outputText value="{!$Label.Average_Order_with_Multiples}" rendered="{!row.busRec.Row_Label__c = 'Average Order with Multiples'}" />
+                                                    <apex:outputText value="{!$Label.Return_net_sales}" rendered="{!row.busRec.Row_Label__c = 'Return Net Sales'}" />
+                                                    <apex:outputText value="{!$Label.Non_Leader}" rendered="{!row.busRec.Row_Label__c = 'Non-Leader'}" />
+                                                    <apex:outputText value="{!row.busRec.Row_Label__c}" rendered="{!OR(row.busRec.Is_Market_Tag__c,row.busRec.Is_Title_Tag__c)}" />
+                                                   <apex:outputPanel rendered="{!AND(row.busRec.Row_Label__c='Total',block.blockName='Titles')}">
+                                                    ({!$Label.Current_Campaign})
+                                                    </apex:outputPanel>
+                                                </td>
+                                                    
+                                                <td contenttype="application/vnd.ms-excel">
+                                                    <apex:outputField value="{!row.busRec.CC_Cnt__c}"/> 
+                                                    <apex:outputField value="{!row.busRec.CC_Amt__c}"/> 
+                                                    <apex:outputText value="{!row.busRec.CC_Txt__c}"/>                          
+                                                </td>
+                                                <td contenttype="application/vnd.ms-excel">
+                                                    <apex:outputField value="{!row.busRec.PC_Cnt__c}"/> 
+                                                    <apex:outputField value="{!row.busRec.PC_Amt__c}"/> 
+                                                    <apex:outputText value="{!row.busRec.PC_Txt__c}"/>                          
+                                                
+                                                </td>
+                                                <td contenttype="application/vnd.ms-excel">
+                                                    <apex:outputField value="{!row.busRec.NC_Cnt__c}"/> 
+                                                    <apex:outputField value="{!row.busRec.NC_Amt__c}"/> 
+                                                    <apex:outputText value="{!row.busRec.NC_Txt__c}"/>                          
+                                                
+                                                </td>
+                                              </tr>
+                                          </apex:repeat>
+                                        </table>
+                                    </td>
+                                  </tr>
+                              </apex:repeat>
+                         </table>
+   </apex:outputPanel>
+   <!-- End of added code:  by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+</apex:page>
+                            	

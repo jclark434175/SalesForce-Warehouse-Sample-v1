@@ -1,0 +1,418 @@
+<apex:page showHeader="false" sidebar="false" controller="RepDetailController" action="{!init}" contenttype="{!$CurrentPage.parameters.contentType}">
+    <apex:composition template="LeaderPageTemplate"  >
+        <apex:define name="content">
+        <style type="text/css">
+            .page_break {page-break-after: always;}
+        </style>
+<table width="900" border="0" cellpadding="0" cellspacing="1">
+  <tr>
+    <td colspan="6" height="10"></td>
+  </tr>
+  <tr>
+    <td width="20" colspan="5"></td>
+    <td align="right">
+        <c:CloseThisPageButton rendered="{!$CurrentPage.parameters.print!=''}"/>
+    </td>
+  </tr>
+</table>
+
+<apex:outputPanel rendered="{!LEN($CurrentPage.parameters.print)=0}">
+<table width="900" border="0" cellpadding="0" cellspacing="1">
+  <tr>
+    <apex:outputPanel rendered="{!NOT($CurrentPage.parameters.print='1')}">
+        <td width="20"></td>
+        <td colspan="4" class="rep_detl_row_filler"><b>{!$Label.Representative}: {!firstContact.row.Representative__r.Name}
+ {!$Label.Account_Nbr}: {!firstContact.row.Representative__r.ACCT_NR__c}</b></td>
+        <td>
+            <c:ReturnToPageButton rendered="{!LEN($CurrentPage.parameters.retPgId)>0}"/>
+        </td>
+    </apex:outputPanel>
+  </tr>
+  <tr>
+    <td width="20"></td>
+    <td align="left" valign="top" width="300">
+        <table width="100%" border="0" cellspacing="1" cellpadding="0">
+          <tr>
+            <td>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                        <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Contact_Information}</td>
+                        <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                    </tr>
+                </table>
+             </td>
+          </tr>
+        </table>
+    </td>
+    <td> </td>
+    <td align="left" valign="top" width="300">
+        <table width="100%" border="0" cellspacing="1" cellpadding="0">
+          <tr>
+            <td>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                        <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Sales_Performance}</td>
+                        <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                    </tr>
+                </table>            
+           </td>
+          </tr>
+        </table>
+    </td>
+    <td> </td>
+    <td align="left" valign="top" width="300">
+        <table width="100%" border="0" cellspacing="1" cellpadding="0">
+          <tr>
+            <td>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                        <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Leadership_Business}</td>
+                        <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                    </tr>
+                </table>            
+            </td>
+          </tr>
+        </table>
+    </td>
+  </tr>
+</table>
+
+</apex:outputPanel>
+<div class="table_with_scrolls" style="height:385px;width:950px">
+  <apex:repeat value="{!contactList}" var="contact">
+    <table width="900" border="0" cellpadding="0" cellspacing="1" class="page_break">
+      <tr>
+        <td width="20"></td>
+        <apex:outputPanel rendered="{!$CurrentPage.parameters.print='1'}">
+        <td colspan="5" class="rep_detl_row_odd"><b>Representative:{!contact.row.Representative__r.Name}, {!$Label.Account_Nbr}:{!contact.row.Representative__r.ACCT_NR__c}</b></td>
+        </apex:outputPanel>
+      </tr>
+      <tr>
+        <td width="20"></td>
+        <td align="left" valign="top" width="300">
+            <table width="100%" border="0" cellspacing="1" cellpadding="0">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.eMail2}</b>: <apex:outputField value="{!contact.row.Representative__r.Email}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Home_Phone}</b>: <apex:outputField value="{!contact.row.Representative__r.HomePhone}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Mobile_Phone}</b>: <apex:outputField value="{!contact.row.Representative__r.MobilePhone}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Work_Phone}</b>: <apex:outputField value="{!contact.row.Representative__r.Phone}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Address}</b>: 
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.MailingStreet)>0}">
+                        <apex:outputField value="{!contact.row.Representative__r.MailingStreet}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.REP_ADDR_STR_2_TXT__c)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.REP_ADDR_STR_2_TXT__c}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.REP_ADDR_STR_3_TXT__c)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.REP_ADDR_STR_3_TXT__c}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.REP_ADDR_STR_4_TXT__c)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.REP_ADDR_STR_4_TXT__c}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.MailingCity)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.MailingCity}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.MailingState)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.MailingState}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.MailingPostalCode)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.MailingPostalCode}"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!LEN(contact.row.Representative__r.MailingCountry)>0}">
+                        ,
+<apex:outputField value="{!contact.row.Representative__r.MailingCountry}"/>
+                    </apex:outputPanel>
+                </td>
+                </tr>
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.REP_LANG_CD__c))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Language}</b>:<apex:outputField value="{!contact.row.Representative__r.REP_LANG_CD__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.sellerSts))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Seller_Status}</b>: <apex:outputText value="{!contact.sellerSts}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.title))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Title}</b>: <apex:outputText value="{!contact.title}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.DownlineGenNbr))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Generation}</b>: <apex:outputText value="{!contact.DownlineGenNbr}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.LDRSHP_LOA_NR__c))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Length_of_Association_in_Leadership}</b>: <apex:outputField value="{!contact.row.Representative__r.LDRSHP_LOA_NR__c}"/></td></tr>
+                </apex:outputPanel> 
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.REP_APPT_DT__c))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Appointment_Date}</b>: <apex:outputField value="{!contact.row.Representative__r.REP_APPT_DT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.LOA_NR__c))}"> 
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Avon_Length_of_Association}</b>: <apex:outputField value="{!contact.row.Representative__r.LOA_NR__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.Birthday__c))}"> 
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Birthdate}</b>: <apex:outputField value="{!contact.row.Representative__r.Birthday__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.PATD_CERTFCTN_IND__c))}">  
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.PATD_Certified}</b>: <apex:outputField value="{!contact.row.Representative__r.PATD_CERTFCTN_IND__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.PATD_CERTFCTN_LVL_DESC_TXT__c))}"> 
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.PATD_Current_Achieved_Level}</b>: <apex:outputField value="{!contact.row.Representative__r.PATD_CERTFCTN_LVL_DESC_TXT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Upline}</b>:
+                <apex:outputLink value="/apex/RepDetail?acctNbr={!contact.row.Representative__r.MRKT_ID__c}{!contact.row.UPLN_GENRTN_1_ACCT_NR__c}&retPgId={!$CurrentPage.parameters.retPgId}" 
+                                  rendered="{!NOT(contact.row.Representative__r.ACCT_NR__c=currUsr.ACCT_NR__c)}">
+                    <apex:outputField value="{!contact.row.UPLN_GENRTN_1_FULL_NM__c}"/>
+                </apex:outputLink>
+                <apex:outputField value="{!contact.row.UPLN_GENRTN_1_FULL_NM__c}"
+                                 rendered="{!(contact.row.Representative__r.ACCT_NR__c=currUsr.ACCT_NR__c)}"/>
+                
+<b> Phone: </b><apex:outputField value="{!contact.row.UPLN_GENRTN_1_PHON_NR__c}"/>
+                </td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Title_at_Risk}</b>: <apex:outputField value="{!contact.row.Representative__r.LDRSHP_TAR_IND__c}"/></td></tr>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.MLPLN_CD__c))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Mail_Plan}</b>: <apex:outputField value="{!contact.row.Representative__r.MLPLN_CD__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Representative__r.TERR_IND__c))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Territory_Code}</b>: <apex:outputField value="{!contact.row.Representative__r.TERR_IND__c}" /></td></tr>
+                </apex:outputPanel>
+                
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Zone}</b>: {!contact.salesOrg.SLS_ZONE_CD__c}<apex:outputField value="{!contact.row.Representative__r.MRKT_SLS_ORG_KEY__c}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Division}</b>: {!contact.salesOrg.SLS_DIV_NM__c}<apex:outputField value="{!contact.row.Representative__r.MRKT_SLS_ORG_KEY__c}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Region}</b>: {!contact.salesOrg.SLS_REGN_NM__c}<apex:outputField value="{!contact.row.Representative__r.MRKT_SLS_ORG_KEY__c}"/></td></tr>
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Zone_Sales_Manager}</b>: {!contact.salesOrg.SLS_ZONE_MGR_FULL_NM__c}
+{!contact.salesOrg.SLS_ZONE_MGR_EMAIL_TXT__c}<apex:outputField value="{!contact.row.Representative__r.MRKT_SLS_ORG_KEY__c}"/></td></tr>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(market.Name))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Country}</b>: <apex:outputField value="{!market.Name}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!RepMktTag1Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!RepMktTag1Lbl}</b>: <apex:outputField value="{!contact.row.Representative__r.DETL_CNTCT_MRKT_TAG_1_AMT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!RepMktTag2Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!RepMktTag2Lbl}</b>: <apex:outputField value="{!contact.row.Representative__r.DETL_CNTCT_MRKT_TAG_2_NR__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!RepMktTag3Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!RepMktTag3Lbl}</b>: <apex:outputField value="{!contact.row.Representative__r.DETL_CNTCT_MRKT_TAG_3_PCT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!RepMktTag4Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!RepMktTag4Lbl}</b>: <apex:outputField value="{!contact.row.Representative__r.DETL_CNTCT_MRKT_TAG_4_TXT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+            </table>
+        </td>
+        <td> </td>
+        <td align="left" valign="top" width="300">
+            <table width="100%" border="0" cellspacing="1" cellpadding="0">
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.title))}">
+                <tr><td align="left" class="rep_detl_row_odd"><b>{!$Label.Title}</b>: <apex:outputText value="{!contact.title}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.AWRD_SLS_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Current_Campaign}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.AWRD_SLS_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.PC_AWRD_SLS_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Prior_Campaign}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.PC_AWRD_SLS_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.YTD_AWRD_SLS_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Year_to_date_Award_Sales}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.YTD_AWRD_SLS_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.BAL_DUE_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Balance}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.BAL_DUE_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.RTURN_NET_SLS_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Return_net_sales}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.RTURN_NET_SLS_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.Percent_of_Current_Net_Sales__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Returns_to_Net_Current_Campaign}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.Percent_of_Current_Net_Sales__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.YTD_RTURN_NET_SLS_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Year_to_date_Return_Sales}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.YTD_RTURN_NET_SLS_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.Percent_of_YTD_Net_Sales__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Returns_to_Net_YTD}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.Percent_of_YTD_Net_Sales__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.PAST_DUE_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Past_Due}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.PAST_DUE_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.YTD_AVG_CUST_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Avg_Customer_Served}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.YTD_AVG_CUST_CNT__c}"/> </td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Personal_Sales__r.YTD_CUST_SERVD_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Year_to_date_Customer_Served}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.YTD_CUST_SERVD_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!OrderMktTag1Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!OrderMktTag1Lbl}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.DETL_SLS_MRKT_TAG_1_AMT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!OrderMktTag2Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!OrderMktTag2Lbl}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.DETL_SLS_MRKT_TAG_2_NR__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!OrderMktTag3Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!OrderMktTag3Lbl}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.DETL_SLS_MRKT_TAG_3_PCT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!OrderMktTag4Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!OrderMktTag4Lbl}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.DETL_SLS_MRKT_TAG_4_TXT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+            </table>
+        </td>
+        <td> </td>
+        <td align="left" valign="top" width="300">
+            <table width="100%" border="0" cellspacing="1" cellpadding="0">
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Group_Award_Sales}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.CC_GRP_NO_ORD_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Orders_Not_Submitted}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_NO_ORD_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.CC_GRP_ORD_ABV_MIN_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Orders_Achieving_Minimum}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_ORD_ABV_MIN_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.CC_GRP_ORD_UND_MIN_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Orders_Under_Minimum}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_ORD_UND_MIN_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TOTAL_TAR_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Title_at_Risk}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.TOTAL_TAR_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TOTAL_CTT_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Performing_at_Next_Level}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.TOTAL_CTT_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.CC_GRP_AVG_CUST_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Avg_Customer_Served}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_AVG_CUST_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.YTD_CUST_SERVD_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Year_to_date_Customer_Served}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.YTD_CUST_SERVD_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.1st_Generation}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TOTAL_GENRTN_2_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.2nd_Generation}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.TOTAL_GENRTN_2_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TOTAL_GENRTN_3_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.3rd_Generation}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.TOTAL_GENRTN_3_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TITL_1_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b><apex:outputText value="{!LdrTitleLvl0}"/></b>: <apex:outputField value="{!contact.row.Group_Sales__r.TITL_1_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TITL_2_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b><apex:outputText value="{!LdrTitleLvl1}"/></b>: <apex:outputField value="{!contact.row.Group_Sales__r.TITL_2_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TITL_3_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b><apex:outputText value="{!LdrTitleLvl2}"/></b>: <apex:outputField value="{!contact.row.Group_Sales__r.TITL_3_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TITL_4_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b><apex:outputText value="{!LdrTitleLvl3}"/></b>: <apex:outputField value="{!contact.row.Group_Sales__r.TITL_4_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!NOT(ISNULL(contact.row.Group_Sales__r.TITL_5_STF_CNT__c))}">
+                <tr><td class="rep_detl_row_odd"><b><apex:outputText value="{!LdrTitleLvl4}"/></b>: <apex:outputField value="{!contact.row.Group_Sales__r.TITL_5_STF_CNT__c}"/></td></tr>
+                </apex:outputPanel>
+                
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Appointments}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_APPT_CNT__c}"/></td></tr>
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Appointments_Year_to_Date}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.YTD_APPT_CNT__c}"/></td></tr>
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Performance_Points}</b>: <apex:outputField value="{!contact.row.Personal_Sales__r.PRFRMNC_POINT_QTY__c}"/></td></tr>
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Removals}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.CC_GRP_RMOVL_CNT__c}"/></td></tr>
+                <tr><td class="rep_detl_row_odd"><b>{!$Label.Year_to_Date_Removals}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.YTD_RMOVL_CNT__c}"/></td></tr>
+                <apex:outputPanel rendered="{!LdrMktTag1Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!LdrMktTag1Lbl}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.DETL_LDRSHP_MRKT_TAG_1_AMT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!LdrMktTag2Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!LdrMktTag2Lbl}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.DETL_LDRSHP_MRKT_TAG_2_NR__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+    
+    
+                <apex:outputPanel rendered="{!LdrMktTag3Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!LdrMktTag3Lbl}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.DETL_LDRSHP_MRKT_TAG_3_PCT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+    
+    
+                <apex:outputPanel rendered="{!LdrMktTag4Lbl !=null}">
+                    <tr><td class="rep_detl_row_odd">
+                    <b>{!LdrMktTag4Lbl}</b>: <apex:outputField value="{!contact.row.Group_Sales__r.DETL_LDRSHP_MRKT_TAG_4_TXT__c}"/>
+                    </td></tr>
+                </apex:outputPanel>
+                <tr>
+                    <td class="rep_detl_row_filler" align="left" valign="bottom">
+                    <img src="{!URLFOR($Resource.AvonSiteAssets,'images/logo1.gif')}" alt="Avon_logo" border=0>
+                    </td>
+                </tr>               
+                
+            </table>
+        </td>
+      </tr>
+    </table>
+  
+
+  </apex:repeat>
+</div>
+<apex:outputPanel rendered="{!$CurrentPage.parameters.print='1'}">
+    <script type="text/javascript">
+        window.print();     
+    </script>
+</apex:outputPanel>
+        </apex:define>
+    </apex:composition>
+</apex:page>
+                            	

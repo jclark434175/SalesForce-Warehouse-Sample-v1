@@ -1,0 +1,182 @@
+<apex:page showHeader="false" sidebar="false" controller="ZoneDivEarnOpptyController" action="{!init}"
+            cache="true" contenttype="{!$CurrentPage.parameters.contentType}">
+    <apex:composition template="LeaderPageTemplate">
+            <apex:define name="content">
+                <table width="950" border="0" cellspacing="0" cellpadding="1">
+                    <tr>
+                        <td colspan="3" height="15" id="spacing_from_header"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" align="right" id="headings">
+                            <c:ReturnToPageButton />
+                        </td>
+                    </tr>
+                </table>            
+                <table width="950" border="0" cellspacing="0" cellpadding="1">
+                    <tr>
+                        <td width="5" id="spacer_left"></td>
+                        <td>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="1">
+                               <tr>
+                                    <td width="60%" align="left" valign="top">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                                <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                                <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Earning_Opportunity}</td>
+                                                <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                                         </tr>
+                                        </table>
+                                    </td>
+                                    <td width="2%"></td>
+                                    <td width="38%" align="left" valign="top">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                                  <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                                  <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Key_Info}</td>
+                                                  <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                                          </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <div class="table_with_scrolls" style="height:385px;width:970px">
+                <table width="950" border="0" cellspacing="0" cellpadding="1">
+                    <tr>
+                        <td width="5" id="spacer_left"></td>
+                        <td>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="1">
+                               <tr>
+                                    <td align="left" valign="top">
+                                            <table id="my information_hdr" width="100%" border="0" cellpadding="0" cellspacing="0">
+                                                <tr class="information_header" >
+                                                    <td width="150" align="left" class="data_cell"></td>
+                                                    <td width="100" class="data_cell">{!$Label.Leadership}</td>
+                                                    <td width="100" class="data_cell">{!$Label.Non_Leadership}</td>
+                                                    <td width="100" class="data_cell" >{!$Label.Total}</td>
+                                                </tr>
+                                                <tr class="display_row_odd" >
+                                                    <td width="150" align="left" class="data_cell">{!$Label.Orders_Not_Submitted}</td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordNotSub.Ldr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordNotSub.NonLdr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordNotSub.CC_CNT__c}"/></td>
+                                                </tr>
+                                                <tr class="display_row_even" >
+                                                    <td width="150" align="left" class="data_cell">{!$Label.Orders_on_Hold}</td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordOnHold.Ldr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordOnHold.NonLdr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordOnHold.CC_CNT__c}"/></td>
+                                                </tr>
+                                                <tr class="display_row_odd" >
+                                                    <td width="150" align="left" class="data_cell">{!$Label.Pending_Orders}</td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordPending.Ldr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordPending.NonLdr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!ordPending.CC_CNT__c}"/></td>
+                                                </tr>
+                                                <tr class="display_row_even" style="background-color:#f8dfdf">
+                                                    <td width="150" align="left" class="data_cell">{!$Label.Total_Order_Opportunity}</td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!totalOppty.Ldr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!totalOppty.NonLdr_CNT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!totalOppty.CC_CNT__c}"/></td>
+                                                </tr>
+                                                <tr class="display_row_odd">
+                                                    <td width="150" align="left" class="data_cell">{!$Label.Average_Order}</td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!avgOrderAmt.Ldr_AMT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!avgOrderAmt.NonLdr_AMT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!avgOrderAmt.CC_AMT__c}"/></td>
+                                                </tr>
+                                                <tr class="display_row_even" style="background-color:#f8dfdf">
+                                                    <td width="150" align="left" class="data_cell"><b>{!$Label.Opportunity}</b></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!earnOppty.Ldr_AMT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!earnOppty.NonLdr_AMT__c}"/></td>
+                                                    <td width="100" class="data_cell"><apex:outputField value="{!earnOppty.CC_AMT__c}"/></td>
+                                                </tr>
+                                                <tr class="display_row_odd">
+                                                    <td colspan="5" align="left" height="20" id="spacer"></td>
+                                                </tr>
+                                                <tr class="information_header" >
+                                                    <td class="data_cell" width="150"></td> 
+                                                    <!-- Changed By Sabyasachi Maji on September 15, 2009 -->
+                                                    <!-- Changed by Anand on 10/7: Made the Plan column conditional based on the config on the market level -->
+                                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+                                                    	<td class="data_cell" width="100">{!$Label.Plan}</td>                                                 
+                                                    </apex:outputPanel>
+                                                    <td class="data_cell" width="100">{!$Label.Current_Campaign}</td>
+                                                    <td class="data_cell" width="100">{!$Label.Difference}</td>
+                                                </tr>
+
+                                            <apex:repeat value="{!activityRows}" var="row">
+                                                <tr class="{!IF(row.dataRec.Odd_Row__c,'display_row_odd','display_row_even')}">
+                                                    <td class="data_cell" width="150" align="left">
+                                                        <apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.dataRec.Row_Label__c = 'Net Sales'}" />
+                                                        <apex:outputText value="{!$Label.Average_Order}" rendered="{!row.dataRec.Row_Label__c = 'Average Order'}" />
+                                                        <apex:outputText value="{!$Label.Additions}" rendered="{!row.dataRec.Row_Label__c = 'Additions'}" />
+                                                        <apex:outputText value="{!row.dataRec.Row_Label__c}" rendered="{!row.dataRec.Is_Market_Tag__c}"/>
+                                                    </td>
+                                                    <!-- Changed By Sabyasachi Maji on September 15, 2009 -->
+                                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+	                                                    <td class="data_cell"  width="100">
+	                                                        <apex:outputField value="{!row.dataRec.Plan_AMT__c}" /> 
+	                                                        <apex:outputField value="{!row.dataRec.Plan_CNT__c}" /> 
+	                                                        <apex:outputField value="{!row.dataRec.Plan_TXT__c}" />
+	                                                    </td>
+                                                    </apex:outputPanel>
+                                                    <td class="data_cell"  width="100">
+                                                        <apex:outputField value="{!row.dataRec.CC_AMT__c}"/> 
+                                                        <apex:outputField value="{!row.dataRec.CC_CNT__c}"/> 
+                                                        <apex:outputField value="{!row.dataRec.CC_TXT__c}"/>
+                                                    </td>
+                                                    <td class="data_cell" width="100">
+                                                        <apex:outputField value="{!row.dataRec.PC_AMT__c}"/> 
+                                                        <apex:outputField value="{!row.dataRec.PC_CNT__c}"/> 
+                                                        <apex:outputField value="{!row.dataRec.PC_TXT__c}"/>
+                                                    </td>
+                                                </tr>
+                            
+                                            </apex:repeat>
+                                                                 
+                                        </table>
+                                    </td>
+                                    <td width="2%"></td>
+                                    <td width="38%" align="left" valign="top">
+                                         <table id="my information_data" width="100%" border="0" cellpadding="0" cellspacing="0">
+                                                <tr class="information_header">
+                                                    <td nowrap="nowrap" align="left" class="data_cell">{!$Label.Key_Info}</td>
+                                                    <td nowrap="nowrap" class="data_cell" align="center">{!$Label.Current_Campaign}</td>
+                                                </tr>
+                                                <apex:repeat value="{!keyInfoRows}" var="row">
+                        						<apex:outputPanel rendered="{!LEN(row.dataRec.Row_Label__c)>0}">
+                                                <tr class="{!IF(row.dataRec.Odd_Row__c,'display_row_odd','display_row_even')}">
+                                                    <td align="left" nowrap="nowrap" class="data_cell">
+                                                        <apex:outputText value="{!$Label.Award_Sales_Leaders}" rendered="{!row.dataRec.Row_Label__c = 'Award Sales - Leaders'}" />
+                                                        <apex:outputText value="{!$Label.Award_Sales_Non_Leaders}" rendered="{!row.dataRec.Row_Label__c = 'Award Sales - Non-Leaders'}" />
+                                                        <apex:outputText value="{!$Label.Award_Sales_Total}" rendered="{!row.dataRec.Row_Label__c = 'Award Sales - Total'}" />
+                                                        <apex:outputText value="{!$Label.Average_Order_Total}" rendered="{!row.dataRec.Row_Label__c = 'Average Order - Total'}" />
+                                                        <apex:outputText value="{!$Label.Customers_Served_Total}" rendered="{!row.dataRec.Row_Label__c = 'Customers Served - Total'}" />
+                                                        <apex:outputText value="{!$Label.Average_Customer_Served_Total}" rendered="{!row.dataRec.Row_Label__c = 'Average Customer Served - Total'}" />
+                                                        <apex:outputText value="{!$Label.Average_Customer_Purchase_Total}" rendered="{!row.dataRec.Row_Label__c = 'Average Customer Purchase - Total'}" />
+                                                        
+                                                        <apex:outputText value="{!row.dataRec.Row_Label__c}" rendered="{!AND(LEN(row.dataRec.Row_Label__c)>0,OR(row.dataRec.Is_Market_Tag__c,row.dataRec.Is_Title_Tag__c))}"/>
+                                                    </td>
+                                                    <td nowrap="nowrap" class="data_cell">
+                                                        <apex:outputField value="{!row.dataRec.CC_AMT__c}"/> 
+                                                        <apex:outputField value="{!row.dataRec.CC_CNT__c}"/> 
+                                                        <apex:outputField value="{!row.dataRec.CC_TXT__c}"/>
+                                                    </td>
+                                                </tr>
+						                        </apex:outputPanel>
+                                                </apex:repeat>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </apex:define>
+    </apex:composition>
+</apex:page>
+                            	

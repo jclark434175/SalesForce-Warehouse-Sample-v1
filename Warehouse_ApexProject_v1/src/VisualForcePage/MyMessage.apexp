@@ -1,0 +1,98 @@
+<apex:page Controller="MyMessageController" showHeader="false" sidebar="false">
+    <apex:composition template="LeaderPageTemplate">
+    <apex:define name="content">
+    <div id="main_content" class="table_with_scrolls" style="height:480px">
+    <apex:form id="broadcastmsg">
+    <!--starts of the page outlook-->
+        <apex:pageBlock id="pageBlock" title="{!$Label.Market_Messages}">
+        <apex:pageBlockTable value="{!broadcast}" var="b" id="table" cellpadding="0" cellspacing="0" bgcolor="white" >
+            <apex:column >
+            <!-- Gives me the header first and then the data-->
+            <apex:facet name="header">{!$Label.Subject}</apex:facet>
+            <!--Place the Header in a Link with the Id-->
+                <a href="/apex/MyMessageDetail?retPgId={!$CurrentPage.parameters.pgId}&id={!b.Id}&msgType=1">{!b.subject}</a>
+            </apex:column> 
+            <apex:column >
+                <apex:facet name="header">{!$Label.ActivityDate}</apex:facet>
+                <apex:outputField value="{!b.ActivityDate}"/>
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">{!$Label.Status}</apex:facet>
+                {!b.Status}
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">{!$Label.Priority}</apex:facet>
+                {!b.Priority}
+            </apex:column>
+            <!-- 
+            <apex:column >
+            <apex:facet name="header">{!$Label.Description}</apex:facet>           
+            {!b.Description}
+            </apex:column>
+             -->
+        </apex:pageBlockTable>
+        
+        </apex:pageBlock>  
+    </apex:form>
+    <!--  
+    <apex:pageBlock id="pageBlock" title="Market Surveys">
+        <apex:pageBlockTable value="{!MarketSurveys}" var="survey"  cellpadding="0" cellspacing="0" bgcolor="white" >
+            <apex:column value="{!survey.Name}"/>
+            <apex:column value="{!survey.End_Date__c}"/>
+            <apex:column >
+                <a target="_blank" href="/apex/ViewMarketSurvey?id={!survey.Id}">Take this Survey</a>
+            </apex:column>
+
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+    -->
+    <apex:form id="taskList">
+    <!--starts of the page outlook-->
+        <apex:pageBlock id="pageBlock" title="{!$Label.My_Messages}">
+        <apex:pageBlockTable value="{!tasks}" var="t" id="table" cellpadding="0" cellspacing="0" bgcolor="white" >
+            <apex:column headerValue="{!$Label.Delete_Message}">
+                <apex:commandLink value="X" action="{!deleteMessage}">
+                    <apex:param value="{!t.Id}" name="tskToClose" assignTo="{!tskToClose}"/>
+                </apex:commandLink>
+            </apex:column>
+            <apex:column >
+            <!-- Gives me the header first and then the data-->
+            <apex:facet name="header">{!$Label.Subject}</apex:facet>
+            <!--Place the Header in a Link with the Id-->
+                <a href="/apex/MyMessageDetail?retPgId={!$CurrentPage.parameters.pgId}&id={!t.id}&msgType=2">{!t.subject}</a>
+            </apex:column> 
+            <apex:column >
+                <apex:facet name="header">{!$Label.ActivityDate}</apex:facet>
+                <apex:outputField value="{!t.ActivityDate}"/>
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">{!$Label.Status}</apex:facet>
+                {!t.Status}
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">{!$Label.Priority}</apex:facet>
+                {!t.Priority}
+            </apex:column>
+            <!-- 
+            <apex:column >
+            <apex:facet name="header">{!$Label.Description}</apex:facet>           
+            {!t.Description}
+            </apex:column>
+             -->
+        </apex:pageBlockTable>
+        
+        </apex:pageBlock>
+<!--<apex:panelGrid columns="2">
+
+            <apex:commandLink action="{!previous}" rendered="{!hasPrevious}">Previous</apex:commandlink>
+
+            <apex:commandLink action="{!next}" rendered="{!hasNext}">Next</apex:commandlink>
+
+        </apex:panelGrid>-->
+        
+    </apex:form>
+    </div>
+    </apex:define>
+</apex:composition>
+</apex:page>
+                            	

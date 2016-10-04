@@ -1,0 +1,41 @@
+<apex:component controller="ASLFReportsController">
+    <apex:attribute name="repAcctNbr" assignTo="{!repAcctNbr}" 
+    				description="Rep Account number" type="string" required="true" />
+				{!Initialize}
+				<script type="text/javascript" src="{!$Resource.MD5JS}"></script>
+				<script type="text/javascript">
+				function redirectToASLF(){
+					var aslfFrame = document.getElementById('aslf_reports');
+					var srcVal = '{!repAcctNbr}{!dateStr}abcdefgh';
+					var unEncLayer = document.getElementById('result');
+					var keyVal = hex_md5(srcVal);
+					//aslfFrame.src= 'https://qa.aslfeu.reports.avon.com/GSLSuiteEU/login/login.jsp?account_nr=1091010&lang=RO&mrkt=27&key=1f80a0520b1c7a1a0bdfa15115578b3f';
+					var aslfUrl = '{!market.Campaign_Report_Override_URL__c}';
+					if(aslfUrl=='' || aslfUrl.length==0){
+						aslfUrl='{!market.ASLF_Report_Url__c}?account_nr={!repAcctNbr}&lang={!usrLangCd}&mrkt={!market.ASLF_Market_Id__c}&key='+keyVal;
+					}
+					aslfFrame.src = aslfUrl;
+					unEncLayer.innerHTML='Value before Md5 Encryption:'+srcVal+'Final URL:'+aslfUrl;
+				}
+				
+				function checkSession(){
+					var keepAlive = document.getElementById('keepalive');
+					keepAlive.src = '/apex/ASLFKeepAlive';
+				}
+				</script>
+				<body onLoad="redirectToASLF()">
+
+				<div id="result">
+								
+				</div>
+				 
+				 <iframe id="aslf_reports" width="970" height="548" frameborder="0" scroller="no" onload=checkSession()>
+				 
+				 </iframe>
+				 <iframe id="keepalive" width="0" height="0" frameborder="0">
+				 
+				 </iframe>
+				</body>
+
+</apex:component>
+                             	

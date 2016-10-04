@@ -1,0 +1,39 @@
+<apex:component controller="MySalesPerfChartController">
+	<apex:attribute name="chartTitle" type="String" assignTo="{!chartTitle}" 
+		required="true" description="Title for the Chart" />
+
+	<apex:attribute name="chartCurrent" type="String" assignTo="{!chartCurrent}" 
+		required="true" description="Title for Current Campaign" />
+	<apex:attribute name="chartPrior" type="String" assignTo="{!chartPrior}" 
+		required="true" description="Title for Prior Campaign" />
+
+	<apex:attribute name="market" type="Market__c" assignTo="{!market}" 
+		required="true" description="Reference to the Market"/>
+
+	<apex:attribute name="awardSales" type="My_Business_Row__c" assignTo="{!awardSales}" 
+		required="true" description="Award Sales Data" />
+	<apex:attribute name="awardSalesLabel" type="String" assignTo="{!awardSalesLabel}" 
+		required="true" description="Award Sales Label" />
+
+	<apex:attribute name="netSales" type="My_Business_Row__c" assignTo="{!netSales}" 
+		required="true" description="Net Sales Data" />
+	<apex:attribute name="netSalesLabel" type="String" assignTo="{!netSalesLabel}" 
+		required="true" description="Net Sales Label" />
+		
+		
+		
+		<!-- 
+			Component Body
+		 -->
+		
+		<apex:outputText value="{!initialize}"/>
+		<apex:outputPanel rendered="{!LEN(chartData)>0}">
+			<c:ColumnChart jsondata="{!chartData}"
+						   title=""
+						   is3d="true"
+						   width="300"
+						   height="200"
+						   legend="bottom"/>
+		</apex:outputPanel>		
+</apex:component>
+                             	

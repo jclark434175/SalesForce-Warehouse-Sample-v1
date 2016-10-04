@@ -1,0 +1,6 @@
+<apex:page showHeader="false" sidebar="false" controller="PreviewEmailTemplateController" action="{!init}">
+			<div id="htmlContent" class="table_with_scrolls" style="height:450px;width:940px">
+				<apex:outputText value="{!htmlValue}" escape="false"/>	
+			</div>
+</apex:page>
+                            	

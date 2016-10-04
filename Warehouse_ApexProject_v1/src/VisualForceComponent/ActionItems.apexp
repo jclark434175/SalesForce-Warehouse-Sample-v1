@@ -1,0 +1,158 @@
+<apex:component controller="ActionItemsController">
+    <apex:attribute name="repAcctNbr" assignTo="{!repAcctNbr}" description="Rep Acct Nbr for the Logged In User" type="string" required="false" />
+    <apex:attribute name="summaryObject" assignTo="{!summaryObj}" description="Leader Downline Summary Object" type="SObject" required="false" />
+    <apex:attribute name="itemsToDisplay" type="Integer" assignTo="{!itemsToDisplay}" required="true" description="Nbr Of Items to Display" />
+
+         <apex:outputText value="{!Initialize}"/>   
+            <table width="100%" border="0" cellspacing="0" cellpadding="1">
+      <tr>
+        <td>    
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" height="26">
+        <tr>
+            <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+            <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading" nowrap="nowrap">{!$Label.Leadership_Action_Items}</td>
+            <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+        </tr>
+        </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        
+        <table width="100%" border="0" cellspacing="0" cellpadding="1">
+           <apex:outputPanel rendered="{!AND(market.Mail_Plan_Enabled__c,userProfile='Avon Leader')}">
+	      <tr>
+	      	<td class="detailText" align="center">{!$Label.Next} {!nbrMplans} {!$Label.Mail_Plans}</td>
+	      </tr>
+        	</apex:outputPanel>
+        
+          <tr>
+            <td bgcolor="#333333" class="table_heading">{!$Label.Orders}</td>
+          </tr>
+        <apex:repeat value="{!orderActionItems}" var="item">
+          <tr>
+                <td class="detailText">
+                <a  target="_parent" href="/apex/DrilldownReport?pgId=101&retPgId={!$CurrentPage.parameters.pgId}&rptId={!item.reportId}&recCnt={!item.counts.CC_Cnt__c}">
+<apex:outputText value="{!$Label.Additions_Reinstatements_Removals}" rendered="{!item.category='Additions / Reinstatements / Removals'}"/>
+<apex:outputText value="{!$Label.Birthday_Anniversaries}" rendered="{!item.category='Birthday / Avon Anniversary'}"/>
+<apex:outputText value="{!$Label.Candidate_Development}" rendered="{!item.category='Candidate Development'}"/>
+<apex:outputText value="{!$Label.Development_LOA_1_6}" rendered="{!item.category='Development Report LOA 1-6'}"/>
+<apex:outputText value="{!$Label.Personal_Sales_Qual}" rendered="{!item.category='Downline Personal Sales Qualifier'}"/>
+<apex:outputText value="{!$Label.Downline_Detail}" rendered="{!item.category='General Detail'}"/>
+<apex:outputText value="{!$Label.Inactive}" rendered="{!item.category='Inactive'}"/>
+<apex:outputText value="{!$Label.Inherited}" rendered="{!item.category='Inherited'}"/>
+<apex:outputText value="{!$Label.Orders_at_Minimum}" rendered="{!item.category='Minimum Order Size'}"/>
+<apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!item.category='Orders / Sales under minimum'}"/>
+<apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!item.category='Orders Not submitted'}"/>
+<apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!item.category='Orders on Hold'}"/>
+<apex:outputText value="{!$Label.Total_Orders_received2}" rendered="{!item.category='Orders Received'}"/>
+<apex:outputText value="{!$Label.PATD_Certified}" rendered="{!item.category='P.A.T.D. Certified'}"/>
+<apex:outputText value="{!$Label.Balance_Past_Due}" rendered="{!item.category='Past Due / Balance'}"/>
+<apex:outputText value="{!$Label.Pending_Orders}" rendered="{!item.category='Pending Orders'}"/>
+<apex:outputText value="{!$Label.Ranking_and_Recognition}" rendered="{!item.category='Ranking & Recognition'}"/>
+<apex:outputText value="{!$Label.Returns}" rendered="{!item.category='Return Sales'}"/>
+<apex:outputText value="{!$Label.Title_Change}" rendered="{!item.category='Title Change'}"/>
+                </a>
+                <apex:outputPanel rendered="{!NOT(ISNULL(item.counts.CC_Cnt__c))}"> 
+	                (<apex:outputField value="{!item.counts.CC_Cnt__c}"/>)</td>
+                </apex:outputPanel>
+          </tr>
+        </apex:repeat>
+        </table>
+        </td>
+      </tr>
+      <tr height="5px">
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+        <table width="100%" border="0" cellspacing="0" cellpadding="1">
+          <tr>
+            <td bgcolor="#333333" class="table_heading">{!$Label.Sales}</td>
+          </tr>
+        <apex:repeat value="{!salesActionItems}" var="item">
+          <tr>
+            <td class="detailText"><a target="_parent" href="/apex/DrilldownReport?pgId=101&retPgId={!$CurrentPage.parameters.pgId}&rptId={!item.reportId}&recCnt={!item.counts.CC_Cnt__c}">
+<apex:outputText value="{!$Label.Additions_Reinstatements_Removals}" rendered="{!item.category='Additions / Reinstatements / Removals'}"/>
+<apex:outputText value="{!$Label.Birthday_Anniversaries}" rendered="{!item.category='Birthday / Avon Anniversary'}"/>
+<apex:outputText value="{!$Label.Candidate_Development}" rendered="{!item.category='Candidate Development'}"/>
+<apex:outputText value="{!$Label.Development_LOA_1_6}" rendered="{!item.category='Development Report LOA 1-6'}"/>
+<apex:outputText value="{!$Label.Personal_Sales_Qual}" rendered="{!item.category='Downline Personal Sales Qualifier'}"/>
+<apex:outputText value="{!$Label.Downline_Detail}" rendered="{!item.category='General Detail'}"/>
+<apex:outputText value="{!$Label.Inactive}" rendered="{!item.category='Inactive'}"/>
+<apex:outputText value="{!$Label.Inherited}" rendered="{!item.category='Inherited'}"/>
+<apex:outputText value="{!$Label.Orders_at_Minimum}" rendered="{!item.category='Minimum Order Size'}"/>
+<apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!item.category='Orders / Sales under minimum'}"/>
+<apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!item.category='Orders Not submitted'}"/>
+<apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!item.category='Orders on Hold'}"/>
+<apex:outputText value="{!$Label.Total_Orders_received2}" rendered="{!item.category='Orders Received'}"/>
+<apex:outputText value="{!$Label.PATD_Certified}" rendered="{!item.category='P.A.T.D. Certified'}"/>
+<apex:outputText value="{!$Label.Balance_Past_Due}" rendered="{!item.category='Past Due / Balance'}"/>
+<apex:outputText value="{!$Label.Pending_Orders}" rendered="{!item.category='Pending Orders'}"/>
+<apex:outputText value="{!$Label.Ranking_and_Recognition}" rendered="{!item.category='Ranking & Recognition'}"/>
+<apex:outputText value="{!$Label.Returns}" rendered="{!item.category='Return Sales'}"/>
+<apex:outputText value="{!$Label.Title_Change}" rendered="{!item.category='Title Change'}"/>
+            </a> 
+                <apex:outputPanel rendered="{!NOT(ISNULL(item.counts.CC_Cnt__c))}"> 
+	                (<apex:outputField value="{!item.counts.CC_Cnt__c}"/>)</td>
+                </apex:outputPanel>
+          </tr>
+        </apex:repeat>
+        </table>
+        </td>
+      
+      </tr>
+      <tr height="5px">
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+        <table width="100%" border="0" cellspacing="0" cellpadding="1">
+          <tr>
+            <td bgcolor="#333333" class="table_heading">{!$Label.Current_Business}</td>
+          </tr>
+        <apex:repeat value="{!busActionItems}" var="item">
+          <tr>
+                <td class="detailText"><a target="_parent" href="/apex/DrilldownReport?pgId=101&retPgId={!$CurrentPage.parameters.pgId}&rptId={!item.reportId}&recCnt={!item.counts.CC_Cnt__c}">
+<apex:outputText value="{!$Label.Additions_Reinstatements_Removals}" rendered="{!item.category='Additions / Reinstatements / Removals'}"/>
+<apex:outputText value="{!$Label.Birthday_Anniversaries}" rendered="{!item.category='Birthday / Avon Anniversary'}"/>
+<apex:outputText value="{!$Label.Candidate_Development}" rendered="{!item.category='Candidate Development'}"/>
+<apex:outputText value="{!$Label.Development_LOA_1_6}" rendered="{!item.category='Development Report LOA 1-6'}"/>
+<apex:outputText value="{!$Label.Personal_Sales_Qual}" rendered="{!item.category='Downline Personal Sales Qualifier'}"/>
+<apex:outputText value="{!$Label.Downline_Detail}" rendered="{!item.category='General Detail'}"/>
+<apex:outputText value="{!$Label.Inactive}" rendered="{!item.category='Inactive'}"/>
+<apex:outputText value="{!$Label.Inherited}" rendered="{!item.category='Inherited'}"/>
+<apex:outputText value="{!$Label.Orders_at_Minimum}" rendered="{!item.category='Minimum Order Size'}"/>
+<apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!item.category='Orders / Sales under minimum'}"/>
+<apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!item.category='Orders Not submitted'}"/>
+<apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!item.category='Orders on Hold'}"/>
+<apex:outputText value="{!$Label.Total_Orders_received2}" rendered="{!item.category='Orders Received'}"/>
+<apex:outputText value="{!$Label.PATD_Certified}" rendered="{!item.category='P.A.T.D. Certified'}"/>
+<apex:outputText value="{!$Label.Balance_Past_Due}" rendered="{!item.category='Past Due / Balance'}"/>
+<apex:outputText value="{!$Label.Pending_Orders}" rendered="{!item.category='Pending Orders'}"/>
+<apex:outputText value="{!$Label.Ranking_and_Recognition}" rendered="{!item.category='Ranking & Recognition'}"/>
+<apex:outputText value="{!$Label.Returns}" rendered="{!item.category='Return Sales'}"/>
+<apex:outputText value="{!$Label.Title_Change}" rendered="{!item.category='Title Change'}"/>
+                </a> 
+                <apex:outputPanel rendered="{!NOT(ISNULL(item.counts.CC_Cnt__c))}"> 
+	                (<apex:outputField value="{!item.counts.CC_Cnt__c}"/>)</td>
+                </apex:outputPanel>
+          </tr>
+        </apex:repeat>
+        </table>
+        <!--
+        Uncomment if you need to display the report list on all places
+        that action Items display.
+        <c:MarketReportLinks marketId="{!market.Market_Id__c}"
+                     rpt2Display="Development LOA 1-6,Ranking & Recognition"/>
+        
+         -->
+        </td>     
+      </tr>
+    </table>
+     <script type="text/javascript">
+     	showHideMessage('hidden');
+     </script>
+
+</apex:component>
+                             	

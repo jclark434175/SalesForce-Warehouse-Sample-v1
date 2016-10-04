@@ -1,0 +1,60 @@
+<apex:component >
+			<apex:outputPanel rendered="{!LEN($CurrentPage.parameters.retPgId)>0}">
+			<table border="0" cellspacing="0" cellpadding="0">
+			      <tr>
+	                    <td align="center">
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='1'}">
+								<a class="detailLink" href="/apex/MyBusiness?pgId=1">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='2'}">
+								<a class="detailLink" href="/apex/LeaderDownline?pgId=2">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='3'}">
+								<a class="detailLink" href="/apex/LdrDownlineAnalysis?pgId=3&section={!$CurrentPage.parameters.section}">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='4'}">
+								<a class="detailLink" href="/apex/LeaderMyDownline?pgId=4">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='6'}">
+								<a class="detailLink" href="/apex/MyMessage?pgId=6">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='8'}">
+								<a class="detailLink" href="/apex/SalesOrgActivity?pgId=8">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='9'}">
+								<a class="detailLink" href="/apex/LdrshipActivity?pgId=9">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='10'}">
+								<a class="detailLink" href="/apex/MarketAnalysis?pgId=10&section=Orders">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='11'}">
+								<a class="detailLink" href="/apex/MyMarket?pgId=11">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='12'}">
+								<a class="detailLink" href="/apex/LeaderInfo?pgId=12">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!$CurrentPage.parameters.retPgId='7'}">
+								<a class="detailLink" href="/apex/eTools?pgId=7">
+							</apex:outputPanel>
+							<apex:outputPanel rendered="{!AND($CurrentPage.parameters.retPgId='30',$CurrentPage.parameters.PgId='101') }">
+								<a class="detailLink" href="/apex/ALMReports?pgId=30&retPgId=3">
+							</apex:outputPanel>
+							   	{!$Label.Return_To_Page}
+	                    	</a>
+	                    </td>
+	      		  </tr>
+		    </table>
+		    </apex:outputPanel>
+		  	<apex:outputPanel rendered="{!LEN($CurrentPage.parameters.retUrl)>0}">
+			<table border="0" cellspacing="0" cellpadding="0">
+			      <tr>
+	                    <td align="center">
+								<a class="detailLink" href="{!$CurrentPage.parameters.retUrl}">
+		                    	{!$Label.Return_To_Page}
+	                    	</a>
+	                    </td>
+	      		  </tr>
+		    </table>
+		    </apex:outputPanel>		    
+</apex:component>
+                             	

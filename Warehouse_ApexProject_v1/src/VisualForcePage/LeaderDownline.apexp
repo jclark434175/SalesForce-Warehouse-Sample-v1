@@ -1,0 +1,36 @@
+<apex:page showHeader="false" sidebar="false" controller="LeaderDownlineController" action="{!init}"
+			cache="true" contenttype="{!IF($CurrentPage.parameters.download='1','contentType=application/vnd.ms-excel#DownlinePerformance.xls','')}">
+			
+	<apex:outputPanel rendered="{!LEN($CurrentPage.parameters.download)=0}">
+	<apex:composition template="LeaderPageTemplate">
+			<apex:define name="content">
+				<c:LdrDownlinePerformance repAcctNbr="{!repAcctNbr}" 
+						salesChartTitle="{!$Label.Downline_Award_Sales}" 
+						salesChart1stGen="{!$Label.X1st}" 
+						salesChart2ndGen="{!$Label.X2nd}"  
+						salesChart3rdGen="{!$Label.X3rd}"  
+						chartCurrent="{!$Label.Current_Campaign}"  
+						chartPrior="{!$Label.Prior_Campaign}"
+						ordersChartTitle="{!$Label.Order_Qualification}"
+						undMinLbl="{!$Label.Under_Min}"
+						achMinLbl="{!$Label.Achieving_Min}"
+						onHldLbl="{!$Label.On_Hold}"
+						pendLbl="{!$Label.Pending}"/> 
+			</apex:define>
+	</apex:composition>
+	</apex:outputPanel>
+	<c:LdrDownlinePerformance repAcctNbr="{!repAcctNbr}" 
+			salesChartTitle="{!$Label.Downline_Award_Sales}" 
+			salesChart1stGen="{!$Label.X1st}" 
+			salesChart2ndGen="{!$Label.X2nd}"  
+			salesChart3rdGen="{!$Label.X3rd}"  
+			chartCurrent="{!$Label.Current_Campaign}"  
+			chartPrior="{!$Label.Prior_Campaign}"
+			ordersChartTitle="{!$Label.Order_Qualification}"
+			undMinLbl="{!$Label.Under_Min}"
+			achMinLbl="{!$Label.Achieving_Min}"
+			onHldLbl="{!$Label.On_Hold}"
+			pendLbl="{!$Label.Pending}"
+			rendered="{!$CurrentPage.parameters.download='1'}"/> 
+</apex:page>
+                            	

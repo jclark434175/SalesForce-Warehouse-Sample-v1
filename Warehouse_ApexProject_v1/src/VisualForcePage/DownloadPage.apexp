@@ -1,0 +1,51 @@
+<apex:page showHeader="false" sidebar="false">
+<!-- Modified by Sabyasachi Maji on 11/13/2009 ; Code added to build up Download page functionality. -->
+<script type="text/javascript">
+ var url = '';
+ var pgId = '{!$CurrentPage.parameters.pgId}';
+ var section = '{!$CurrentPage.parameters.section}';
+ if(pgId =='1'){
+ 	url ='/apex/MyBusiness?pgId=1&download=1';
+ }else if(pgId=='2'){
+ 	url ='/apex/LeaderDownline?pgId=2&download=1';
+ }else if(pgId=='3'){
+ 	if(section == 'Sales')
+ 	{
+ 		url ='/apex/LdrDownlineAnalysis?pgId=3&section=Sales&download=1';
+ 	}
+ 	else if(section == 'Current Business')
+ 	{
+ 		url ='/apex/LdrDownlineAnalysis?pgId=3&section=Current Business&download=1';
+ 	}
+ 	else 
+ 	{
+ 		url ='/apex/LdrDownlineAnalysis?pgId=3&download=1';
+ 	}
+ }else if(pgId=='20'){
+ 	url ='/apex/EarningOppty?pgId=20&contentType=application/vnd.ms-excel#EarningOpportunity.xls';
+ }else if(pgId=='8'){
+ 	url ='/apex/SalesOrgActivity?pgId=8&download=1';
+ }else if(pgId=='9'){
+ 	url ='/apex/LdrshipActivity?pgId=9&download=1';
+ }else if(pgId=='10'){ 	
+ 	if(section == 'Sales')
+ 	{
+ 		url ='/apex/MarketAnalysis?debugZone=1pgId=10&section=Sales&download=1';
+ 	}
+ 	else if(section == 'Current Business')
+ 	{
+ 		url ='/apex/MarketAnalysis?debugZone=1pgId=10&section=Current Business&download=1';
+ 	}
+ 	else 
+ 	{
+ 		url ='/apex/MarketAnalysis?debugZone=1pgId=10&section=Orders&download=1';
+ 	}
+ }else if(pgId=='21'){
+ 	url ='/apex/ZoneDivEarningsOppty?pgId=21&contentType=application/vnd.ms-excel#EarningOpportunity.xls';
+ }
+ window.location=url;
+ 
+</script>
+<!-- End of added code:  by Sabyasachi Maji on 11/13/2009 ; Code added to build up Download page functionality. -->
+</apex:page>
+                            	

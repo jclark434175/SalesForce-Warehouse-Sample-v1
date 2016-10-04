@@ -1,0 +1,118 @@
+<apex:page showHeader="false" sidebar="false" controller="EmailRepsController" action="{!init}">
+	<apex:composition template="LeaderPageTemplate">
+			<apex:define name="content">
+<script type="text/javascript">
+	function selectTemplate(tempId){
+		var tempFld = document.getElementById('{!$Component.theForm.tempId}');
+		tempFld.value = tempId;
+	}
+
+	function showPreview(tempId){
+        var previewWin = window.open('/apex/PreviewTemplate?templateId='+tempId,"eCard_Preview","width=950,height=500,status=1,toolbar=0,menubar=0,scrollbars=1,location=0");
+        previewWin.focus();
+        
+	}
+
+</script>
+
+<table width="900" border="0" cellpadding="0" cellspacing="1">
+  <tr>
+  	<td colspan="6" height="10"></td>
+  </tr>
+  <tr>
+  	<td width="20" colspan="5"></td>
+    <td align="right">
+			<c:ReturnToPageButton />
+    </td>
+  </tr>
+</table>
+<apex:form id="theForm">
+<apex:inputHidden id="tempId" value="{!selTemplateId}"/>
+<table width="900" border="0" cellpadding="0" cellspacing="1">
+  <tr>
+  	<td width="20"></td>
+  	
+    <td align="left" valign="top" width="700">
+        <table width="100%" border="0" cellspacing="1" cellpadding="0">
+          <tr>
+            <td>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<apex:outputPanel rendered="{!emailSuccess}">
+						<tr>
+							<td colspan="3">
+							{!$Label.Email_Confirmation_Msg} ({!$Label.Email_Sent_Success}: {!successEmailCount}, {!$Label.Email_Sent_Failed}: {!failedEmailCount})
+
+							{!$Label.Email_Confirmation_Msg_2}
+							</td>
+							
+						</tr>
+					</apex:outputPanel>
+                    <tr>
+                        <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                        <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Select_an_Email_Template}</td>
+                        <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                    </tr>
+                </table>
+                
+             </td>
+          </tr>
+          <tr>
+            <td>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr class="info_header_left">
+                    	<td width="300" align="left">{!$Label.Subject}</td>
+                    	<td width="300" align="left">{!$Label.Description}</td>
+                    	<td width="100" align="left"></td>
+                    	<td width="60" align="left"></td>
+                    </tr>
+                </table>
+                
+             </td>
+          </tr>
+        </table>
+    </td>
+  </tr>
+</table>
+<div class="table_with_scrolls" style="width:900px;height:400px">
+<table width="900" border="0" cellpadding="0" cellspacing="1">
+  <tr>
+  	<td width="20"></td>
+    <td align="left" valign="top" width="700">
+        <table width="100%" border="0" cellspacing="1" cellpadding="0">
+          <tr>
+            <td>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<apex:repeat value="{!templates}" var="row">
+	                    <tr class="{!IF(row.oddRow,'display_row_odd','display_row_even')}">
+	                    	<td class="data_cell" width="300" align="left">{!row.emailTemplate.Subject}</td>
+	                    	<td class="data_cell" width="300" align="left">{!row.emailTemplate.Description}</td>
+	                    	<td class="data_cell" width="100">
+	                    		<!--  <a target="_blank" href="/p/email/template/EmailTemplateEditorUi/s?id={!row.emailTemplate.Id}&BrandTemplate={!row.emailTemplate.BrandTemplateId}&TemplateType=1&TemplateStyle=2">
+	                    		-->
+	                    		<a href="javascript:showPreview('{!row.emailTemplate.Id}')">
+	                    		{!$Label.Preview}
+	                    		</a>
+	                    	</td>
+	                    	<td class="data_cell" width="60" align="left">
+		                    	<apex:commandLink value="{!$Label.Send}"
+													onClick="selectTemplate('{!row.emailTemplate.Id}')"
+													action="{!sendEmail}">
+								</apex:commandLink>
+		                    	
+	                    	</td>
+	                    </tr>
+                    </apex:repeat>
+                </table>
+                
+             </td>
+          </tr>
+    	</table>
+    </td>
+  </tr>
+</table>
+</div>
+</apex:form>
+  			</apex:define>
+	</apex:composition>
+</apex:page>
+                            	

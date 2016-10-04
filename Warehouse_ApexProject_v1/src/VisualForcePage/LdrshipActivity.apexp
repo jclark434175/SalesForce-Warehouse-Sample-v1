@@ -1,0 +1,427 @@
+<!-- Modified by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+<apex:page showHeader="false" sidebar="false" controller="LdrshipActivityController" action="{!init}"
+            cache="true" contenttype="{!IF($CurrentPage.parameters.download='1','contentType=application/vnd.ms-excel#LdrShipActivity.xls','')}">
+    <apex:outputPanel rendered="{!LEN($CurrentPage.parameters.download)=0}">
+    <apex:composition template="LeaderPageTemplate">
+        <apex:define name="content">
+			<script type="text/javascript" src="{!URLFOR($Resource.Ext_JS)}"></script>
+			<script type="text/javascript">
+				Ext.BLANK_IMAGE_URL = '{!URLFOR($Resource.Ext_Resources,'images/s.gif')}';
+			</script>
+			
+			<link href="{!URLFOR($Resource.Ext_Css)}" rel="stylesheet" type="text/css" />
+           <table width="925" border="0" cellspacing="0" cellpadding="1">
+              <tr>
+                <td colspan="5" height="5"></td>
+              </tr>
+              <tr>
+                <td width="5"> </td>
+                <td width="925" align="left" valign="top">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="1">
+                      <tr colspan="{!enabledColCount}">
+                        <td>
+                            <!--  Table Heading -->
+                            <table width="925" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="2%" align="right"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                    <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">
+                                    
+                                    {!$Label.Tab_Leadership_Activity} : 
+                                        <apex:outputText value="{!currUsr.DFALT_DIV_NM__c}"/>
+                                        <apex:outputPanel rendered="{!LEN(currUsr.DFALT_ZONE_CD__c)>0}">
+                                            - <apex:outputText value="{!currUsr.DFALT_ZONE_CD__c}"/>
+                                        </apex:outputPanel>
+                                    
+                                    </td>
+                                    <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                                    </td>
+                                </tr>
+                            </table>                        
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="925">
+                            <!--  Table Column Headers -->
+                            <div id="loading_msg" style="visibility:visible">
+								  <table width="100%" border="0" cellpadding="0" cellspacing="1">
+								    <tr align="center" >
+								      <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/processing.gif')}"></td>
+								    </tr>
+								    <tr align="center" >
+								      <td>{!$Label.Processing_Status_Message}</td>
+								    </tr>
+								  </table>
+				            </div>
+                            
+                            <div id="grid-panel" style="width:925px;height:415px;visibility:hidden">
+                            	<div id="alm_data_table"></div>
+                            	<div id="alm_data_table_ldr"></div>
+                            </div>
+                        </td>
+                      </tr>
+                    </table>
+                </td>
+              </tr>
+            </table>
+
+<script type="text/javascript">
+	var myCampaignData = new Array();
+	var myLeaderData = new Array();
+	var colHeaderMap = {
+		'Total Leaders':'{!$Label.Total_Leaders}' , 
+		'In Market Leaders' :'{!$Label.In_Market_Leaders}' , 
+		'Out of Market Leaders' :'{!$Label.Out_of_Market_Leaders}' , 
+		'Title Status Promotions' :'{!$Label.Title_Status_Promotions}' , 
+		'Title Status Demotions':'{!$Label.Title_Status_Demotions}' ,
+		'Group Award Sales' :'{!$Label.Group_Award_Sales}' , 
+		'Net Sales' :'{!$Label.Net_Sales}' , 
+		'Paid Sales':'{!$Label.Paid_Sales}' ,
+		'Orders not Submitted':'{!$Label.Orders_Not_Submitted}' ,
+		'Orders Under Minimum':'{!$Label.Orders_Under_Minimum}' ,
+		'Orders Achieving Minimum':'{!$Label.Orders_Achieving_Minimum}' ,
+		'Orders with Multiples' :'{!$Label.Orders_with_Multiples}' , 
+		'New Rep First Order' :'{!$Label.New_Representative_1st_Order}' ,
+		'Active Representatives':'{!$Label.Active_Representatives}' ,
+		'Activity':'{!$Label.Activity}' ,
+		'Average Customers Served':'{!$Label.Avg_Customer_Served}' , 
+		'Orders on Hold':'{!$Label.Orders_on_Hold}' ,
+		'Appointments':'{!$Label.Appointments}' ,
+		'Reinstatements':'{!$Label.Reinstatements}' ,
+		'Removals':'{!$Label.Removals}' ,
+		'Returns' :'{!$Label.Returns}' , 
+		'Past Due Amount' :'{!$Label.Past_Due_Amount}' , 
+		'Earnings Paid' :'{!$Label.Earnings_Paid}' , 
+		'Potential Earnings':'{!$Label.Potential_Earnings}'
+	};
+</script>            
+
+<apex:repeat value="{!activityRows}" var="row">
+<script type="text/javascript">
+	var rowData = new Array();
+	var kpiName = '';
+	var isMarketTag = {!row.dataRec.Is_Market_Tag__c} || {!row.dataRec.Override_Label__c};
+	var rowType = '{!row.dataRec.Row_Label__c}';
+	kpiName = colHeaderMap[rowType];
+	if(!kpiName || kpiName.length==0 ||isMarketTag){
+		kpiName='{!row.dataRec.Row_Label__c}';
+	}
+	rowData.push('{!row.SPPYUpDownInd}-{!row.reverseTrend}');
+	rowData.push('{!row.PCUpDownInd}-{!row.reverseTrend}');
+	rowData.push(kpiName);
+	var fldVal = '<apex:outputField value="{!row.dataRec.Plan_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.Plan_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.Plan_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.CC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.CC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.CC_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.PC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.PC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.PC_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.SPPY_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.SPPY_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.SPPY_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.NC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.NC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.NC_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+	
+	myCampaignData.push(rowData);
+
+	/*
+		Leadership data break out
+	*/
+	rowData = new Array();
+	rowData.push(kpiName);
+	var fldVal = '<apex:outputField value="{!row.dataRec.CC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.CC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.CC_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-Non Leader
+	var fldVal = '<apex:outputField value="{!row.dataRec.NonLdr_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.NonLdr_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.NonLdr_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-UQ
+	var fldVal = '<apex:outputField value="{!row.dataRec.LdtTitleUQ_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitleUQ_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitleUQ_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-1
+	var fldVal = '<apex:outputField value="{!row.dataRec.LdtTitle1_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle1_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle1_TXT__c}"/>';
+	if(rowType=='Activity' ){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-2
+	var fldVal = '<apex:outputField value="{!row.dataRec.LdtTitle2_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle2_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle2_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-3
+	var fldVal = '<apex:outputField value="{!row.dataRec.LdtTitle3_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle3_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle3_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-4
+	var fldVal = '<apex:outputField value="{!row.dataRec.LdtTitle4_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle4_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle4_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+//Title-5
+	var fldVal = '<apex:outputField value="{!row.dataRec.LdtTitle5_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle5_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.LdtTitle5_TXT__c}"/>';
+	if(rowType=='Activity'){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	myLeaderData.push(rowData);
+</script>
+</apex:repeat>
+
+<script type="text/javascript">
+
+		function trendRenderer(value,metaData,record,rowIndex,colIndex,dataStore){
+			var imgPath ='';
+			if(value=='UP-false'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}";
+			}else if(value=='UP-true'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}";
+			}else if(value=='DOWN-false'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}";
+			}else if(value=='DOWN-true'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}";
+			}
+			if(imgPath!=''){
+				return '<img src="'+imgPath+'" alt="" width="10" height="13"/>';
+			}
+			
+		}
+       var dsCampaign = new Ext.data.Store({
+	        proxy: new Ext.data.MemoryProxy(myCampaignData),
+	        reader: new Ext.data.ArrayReader({}, [
+				{name:'sppyTrend'},
+				{name:'pcTrend'},
+				{name:'kpiName'},
+				{name:'plan'},
+				{name:'currCmpgn'},
+				{name:'priorCmpgn'},
+				{name:'sppyCmpgn'},
+				{name:'nextCmpgn'}
+				
+			])
+       });
+       var dsLeader = new Ext.data.Store({
+	        proxy: new Ext.data.MemoryProxy(myLeaderData),
+	        reader: new Ext.data.ArrayReader({}, [
+				{name:'kpiName'},
+				{name:'currCmpgn'},
+				{name:'nonLdr'},
+				{name:'ldrUQ'},
+				{name:'ldr1'},
+				{name:'ldr2'},
+				{name:'ldr3'},
+				{name:'ldr4'},
+				{name:'ldr5'}
+			])
+       });
+
+        dsCampaign.load();
+		dsLeader.load();
+       var colModelCmpgn = new Ext.grid.ColumnModel([
+			{name:'sppyTrend',renderer:this.trendRenderer,width:50,header:'{!$Label.SPPY_Campaign}',dataIndex:'sppyTrend',sortable:true,align:'center',hidden:{!NOT(market.Ldr_Actvty_SPPY_Enabled__c)}},
+			{name:'pcTrend',renderer:this.trendRenderer,width:50,header:'{!$Label.Prior_Campaign}',dataIndex:'pcTrend',sortable:true,align:'center',hidden:{!NOT(market.Ldr_Actvty_PC_Enabled__c)}},
+			{name:'kpiName',width:150,header:'{!$Label.Perf_Info}',dataIndex:'kpiName',sortable:true,align:'left'},
+			{name:'plan',width:75,header:'{!$Label.Plan}',dataIndex:'plan',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Plan_Enabled__c)}},
+			{name:'currCmpgn',width:75,header:'{!$Label.Current_Campaign}',dataIndex:'currCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_CC_Enabled__c)}},
+			{name:'priorCmpgn',width:75,header:'{!$Label.Prior_Campaign}',dataIndex:'priorCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_PC_Enabled__c)}},
+			{name:'sppyCmpgn',width:75,header:'{!$Label.SPPY_Campaign}',dataIndex:'sppyCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_SPPY_Enabled__c)}},
+			{name:'nextCmpgn',width:75,header:'{!$Label.Next_Campaign}',dataIndex:'nextCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_NC_Enabled__c)}}
+		]);
+
+       var colModelLdr = new Ext.grid.ColumnModel([
+			{name:'kpiName',width:165,header:'{!$Label.Perf_Info}',dataIndex:'kpiName',sortable:true,align:'left'},
+			{name:'currCmpgn',width:90,header:'{!$Label.Current_Campaign}',dataIndex:'currCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_CC_Enabled__c)}},
+			{name:'nonLdr',width:90,header:'{!$Label.Non_Leader}',dataIndex:'nonLdr',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_NonLdr_Enabled__c)}},
+			{name:'ldrUQ',width:90,header:'{!LevelUQTitle}',dataIndex:'ldrUQ',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Titl_Lvl_UQ_Enabled__c)}},
+			{name:'ldr1',width:90,header:'{!Level0Title}',dataIndex:'ldr1',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Titl_Lvl_2_Enabled__c)}},
+			{name:'ldr2',width:90,header:'{!Level1Title}',dataIndex:'ldr2',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Titl_Lvl_3_Enabled__c)}},
+			{name:'ldr3',width:90,header:'{!Level2Title}',dataIndex:'ldr3',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Titl_Lvl_3_Enabled__c)}},
+			{name:'ldr4',width:90,header:'{!Level3Title}',dataIndex:'ldr4',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Titl_Lvl_4_Enabled__c)}},
+			{name:'ldr5',width:90,header:'{!Level4Title}',dataIndex:'ldr5',sortable:false,align:'center',hidden:{!NOT(market.Ldr_Actvty_Titl_Lvl_5_Enabled__c)}}
+		]);
+	Ext.onReady(
+		function() {
+	        var grid = new Ext.grid.Grid('alm_data_table', {
+	            ds: dsCampaign,
+	            cm: colModelCmpgn,
+	            enableColumnHide:false,enableDragDrop:false,
+	        	enableColumnMove:false,autoSizeColumns:true,
+	        	enableCtxMenu:false,loadMask:true
+	        });
+	        var gridLeader = new Ext.grid.Grid('alm_data_table_ldr', {
+	            ds: dsLeader,
+	            cm: colModelLdr,
+	            enableColumnHide:false,enableDragDrop:false,
+	        	enableColumnMove:false,
+	        	enableCtxMenu:false,loadMask:true
+	        });
+
+	        grid.addListener('render',function(){
+	        	var loadMsg = document.getElementById('loading_msg');
+	        	loadMsg.style.height='0px'; 
+	        	loadMsg.style.visibility='hidden';
+		        document.getElementById('grid-panel').style.visibility='visible';
+	        });
+	
+        													
+			var layout = Ext.BorderLayout.create({	
+		                    center: {
+		                    	titlebar: false,
+		                        autoScroll:true,
+	                            closeOnTab: true
+		                    }
+						}, 'grid-panel');
+			var dataPanelCmpgn = new Ext.GridPanel(grid,{fitToFrame:true,title:'{!$Label.Current_Performance}'});
+			var dataPanelLdr = new Ext.GridPanel(gridLeader,{fitToFrame:true,fitToContainer:true,title:'{!$Label.Tab_Leadership_Activity}'});
+			layout.beginUpdate();
+			layout.add('center',dataPanelCmpgn);
+			layout.add('center',dataPanelLdr);
+			layout.getRegion('center').showPanel(dataPanelCmpgn);
+			layout.endUpdate();
+	        grid.render();
+	        gridLeader.render();
+		}
+	);
+					
+</script>
+        </apex:define>
+    </apex:composition>
+    </apex:outputPanel>
+    <!-- Added by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+    <apex:outputPanel rendered="{!$CurrentPage.parameters.download='1'}">
+        <table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Name}: <b>{!$User.FirstName} {!$User.FirstName}</b></td>
+    </tr>
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Last_Updated} (dd/MM): <b> 
+	    	<apex:outputText value="{0,date,dd / MM}">
+	    		<apex:param value="{!TODAY()}"/>
+    		</apex:outputText>
+    		</b>
+    	</td>
+    </tr>
+    <tr>
+    <td contenttype="application/vnd.ms-excel"> </td>
+    </tr>
+	</table>
+    
+    
+    <table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Perf_Info}</td>
+    	<apex:outputPanel rendered="{!market.Ldr_Actvty_Plan_Enabled__c}">
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Plan}</td>
+    	</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_CC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Current_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_PC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Prior_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_SPPY_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.SPPY_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_NC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Next_Campaign}</td>
+		</apex:outputPanel>
+    </tr>
+    <apex:repeat value="{!activityRows}" var="row">
+    	<tr>
+    	<td contenttype="application/vnd.ms-excel">
+			<apex:outputText value="{!$Label.Total_Leaders}" rendered="{!row.dataRec.Row_Label__c='Total Leaders'}"/>
+			<apex:outputText value="{!$Label.In_Market_Leaders}" rendered="{!row.dataRec.Row_Label__c='In Market Leaders'}"/>
+			<apex:outputText value="{!$Label.Out_of_Market_Leaders}" rendered="{!row.dataRec.Row_Label__c='Out of Market Leaders'}"/>
+			<apex:outputText value="{!$Label.Title_Status_Promotions}" rendered="{!row.dataRec.Row_Label__c='Title Status Promotions' }"/>
+			<apex:outputText value="{!$Label.Title_Status_Demotions}" rendered="{!row.dataRec.Row_Label__c='Title Status Demotions'}"/>
+			<apex:outputText value="{!$Label.Group_Award_Sales}" rendered="{!row.dataRec.Row_Label__c='Group Award Sales' }"/>
+			<apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.dataRec.Row_Label__c='Net Sales'}"/>
+			<apex:outputText value="{!$Label.Paid_Sales}" rendered="{!row.dataRec.Row_Label__c='Paid Sales' }"/>
+			<apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!row.dataRec.Row_Label__c='Orders not Submitted' }"/>
+			<apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!row.dataRec.Row_Label__c='Orders Under Minimum' }"/>
+			<apex:outputText value="{!$Label.Orders_Achieving_Minimum}" rendered="{!row.dataRec.Row_Label__c='Orders Achieving Minimum'}"/>
+			<apex:outputText value="{!$Label.Orders_with_Multiples}" rendered="{!row.dataRec.Row_Label__c='Orders with Multiples'}"/>
+			<apex:outputText value="{!$Label.New_Representative_1st_Order}" rendered="{!row.dataRec.Row_Label__c='New Rep First Order' }"/>
+			<apex:outputText value="{!$Label.Active_Representatives}" rendered="{!row.dataRec.Row_Label__c='Active Representatives'}"/>
+			<apex:outputText value="{!$Label.Activity}" rendered="{!row.dataRec.Row_Label__c='Activity' }"/>
+			<apex:outputText value="{!$Label.Avg_Customer_Served}" rendered="{!row.dataRec.Row_Label__c='Average Customers Served' }"/>
+			<apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!row.dataRec.Row_Label__c='Orders on Hold' }"/>
+			<apex:outputText value="{!$Label.Appointments}" rendered="{!row.dataRec.Row_Label__c='Appointments' }"/>
+			<apex:outputText value="{!$Label.Reinstatements}" rendered="{!row.dataRec.Row_Label__c='Reinstatements' }"/>
+			<apex:outputText value="{!$Label.Removals}" rendered="{!row.dataRec.Row_Label__c='Removals' }"/>
+			<apex:outputText value="{!$Label.Returns}" rendered="{!row.dataRec.Row_Label__c='Returns' }"/>
+			<apex:outputText value="{!$Label.Past_Due_Amount}" rendered="{!row.dataRec.Row_Label__c='Past Due Amount' }"/>
+			<apex:outputText value="{!$Label.Earnings_Paid}" rendered="{!row.dataRec.Row_Label__c='Earnings Paid' }"/>
+			<apex:outputText value="{!$Label.Potential_Earnings}" rendered="{!row.dataRec.Row_Label__c='Potential Earnings' }"/>
+			<apex:outputText value="{!row.dataRec.Row_Label__c}" rendered="{!OR(row.dataRec.Is_Market_Tag__c, row.dataRec.Override_Label__c)}"/>
+			
+		</td>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_Plan_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.Plan_AMT__c}"/><apex:outputField value="{!row.dataRec.Plan_CNT__c}"/><apex:outputField value="{!row.dataRec.Plan_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_CC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.CC_AMT__c}"/><apex:outputField value="{!row.dataRec.CC_CNT__c}"/><apex:outputField value="{!row.dataRec.CC_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_PC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.PC_AMT__c}"/><apex:outputField value="{!row.dataRec.PC_CNT__c}"/><apex:outputField value="{!row.dataRec.PC_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_SPPY_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.SPPY_AMT__c}"/><apex:outputField value="{!row.dataRec.SPPY_CNT__c}"/><apex:outputField value="{!row.dataRec.SPPY_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Ldr_Actvty_NC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.NC_AMT__c}"/><apex:outputField value="{!row.dataRec.NC_CNT__c}"/><apex:outputField value="{!row.dataRec.NC_TXT__c}"/>
+
+		</td>
+		</apex:outputPanel>
+		</tr>
+	</apex:repeat>
+	</table>
+   </apex:outputPanel>
+   <!-- End of added code:  by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+</apex:page>
+                            	

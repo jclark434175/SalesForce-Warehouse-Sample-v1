@@ -1,0 +1,21 @@
+<apex:page controller="EndOfCampaignUpdate" action="{!init}">
+<apex:form >
+	
+	<apex:outputPanel id="results">
+		Record Count    : {!recCnt}
+
+		StartTime       : {!startTime}
+
+		End Time        : {!endTime}
+
+		Last Row Updated: {!lastRowDtTime}
+
+	</apex:outputPanel>
+	<apex:pageBlock >
+		<apex:pageBlockTable value="{!logs}" var="log">
+			<apex:column value="{!log}"/>
+		</apex:pageBlockTable>
+	</apex:pageBlock>
+</apex:form>
+</apex:page>
+                            	

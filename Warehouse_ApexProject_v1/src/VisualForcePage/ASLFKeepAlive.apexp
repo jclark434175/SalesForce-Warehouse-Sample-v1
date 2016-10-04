@@ -1,0 +1,8 @@
+<apex:page >
+	<apex:composition template="LeaderPageTemplate">
+			<apex:define name="content">
+				keep alive from ASLF..that will inturn keep Web-e Alive
+			</apex:define>
+	</apex:composition>
+</apex:page>
+                            	

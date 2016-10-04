@@ -1,0 +1,35 @@
+<apex:page showHeader="false" sidebar="false" controller="MyActionItemsController" action="{!init}">
+<link rel="stylesheet" media="screen" type="text/css" href="{!$Resource.alm_css}">
+<link rel="stylesheet" media="print" type="text/css" href="{!$Resource.alm_print_css}">
+	<script type="text/javascript">
+        function showHideMessage(msgState){
+        	var processMsg = document.getElementById('processing_msg');
+        	processMsg.style.visibility=msgState;
+       	}
+	
+	</script>
+	<div id="processing_msg" style="position:absolute;left:0px;top:0px;z-index:4;width:300px;height:225px;background-color:#FFFFFF;opacity:.90;filter:Alpha(opacity=90);">
+		<div id="inner_msg_table" style="position:relative;vertical-align:middle;top:30%">
+		  <table width="100%" border="0" cellpadding="0" cellspacing="1">
+		    <tr align="center" >
+		      <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/processing.gif')}"></td>
+		    </tr>
+		    <tr align="center" >
+		      <td>{!$Label.Processing_Status_Message}</td>
+		    </tr>
+		  </table>
+	  </div>
+	</div>
+     <script type="text/javascript">
+     	showHideMessage('visible');
+     </script>
+	
+	<c:ActionItems repAcctNbr="{!repAcctNbr}"
+                   summaryObject="{!ldrSmryRec}"
+                   itemsToDisplay="2"/>
+     <script type="text/javascript">
+     	showHideMessage('hidden');
+     </script>
+ 
+</apex:page>
+                            	

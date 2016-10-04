@@ -1,0 +1,146 @@
+<apex:page showHeader="false" sidebar="false" controller="LdrInfoController" action="{!init}">
+	<apex:composition template="LeaderPageTemplate">
+		<apex:define name="content">
+		<script type="text/javascript">
+			function openLookupWindow(){
+				//alert('inside openLookupWin');
+				var srchTxt = document.getElementById('{!$Component.theForm.contactName}');
+				//alert('srchTxt:'+srchTxt);
+				var urlToOpen = '/apex/LkupObjectSelect?srchTxt='+srchTxt.value;
+				//alert(urlToOpen);
+				window.open(urlToOpen,'rep_lookup','height=300,width=600,status=1,toolbar=0,menubar=0,scrollbars=1,location=0,resizable=0');
+			}
+			
+			function setIdAndName(objId,objName){
+				var idFld = document.getElementById('{!$Component.theForm.contactId}');
+				idFld.value = objId;
+				var nameFld = document.getElementById('{!$Component.theForm.contactName}');
+				nameFld.value = objName;
+				
+			}
+		</script>
+		<div id="mainContent" style="height:525px;width:950px">
+	    <table width="800" border="0" cellspacing="0" cellpadding="5">
+	      <tr align="left" valign="top">
+	        <td width="800">
+		        <table width="800" border="0" cellspacing="0" cellpadding="1">
+		          <tr>
+		            <td align="center">
+						<apex:form id="theForm">
+						<apex:inputHIdden id="contactId" value="{!repContactId}"/>
+			           <table border="0" cellspacing="0" cellpadding="1">
+			              <tr>
+							<apex:outputPanel rendered="{!LEN(section)>0}">
+			                <td width="175">
+				                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+				                      <tr>
+				                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Current Campaign','images/header_sel_left.gif','images/table_left_edge.gif')))}"></td>
+				                        <td width="88%" nowrap background="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Current Campaign','images/header_background_sel.gif','images/header_background.gif')))}" class="table_heading">
+					                        <apex:outputLink value="/apex/LeaderInfo?section=Current Campaign&pgId=12&impRepNbr={!impRepId}&drillDwnRepNbr={!drillDwnRepId}">{!$Label.Current_Campaign}</apex:outputLink>
+				                        </td>
+				                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Current Campaign','images/header_sel_right.gif','images/table_right_edge.gif')))}"></td>
+				                        <td width="2%" nowrap></td>
+				                      </tr>
+				                    </table>                
+			                </td>
+			                <td width="175">
+				                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+				                      <tr>
+				                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Downline','images/header_sel_left.gif','images/table_left_edge.gif')))}"></td>
+				                        <td width="88%" nowrap background="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Downline','images/header_background_sel.gif','images/header_background.gif')))}" class="table_heading">
+				                        <apex:outputLink value="/apex/LeaderInfo?section=Downline&pgId=12&impRepNbr={!impRepId}&drillDwnRepNbr={!impRepId}">{!$Label.Tab_My_Downline}</apex:outputLink>
+				                        </td>
+				                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Downline','images/header_sel_right.gif','images/table_right_edge.gif')))}"></td>
+				                        <td width="2%" nowrap></td>
+				                      </tr>
+				                    </table>                
+			                </td>
+			                <td width="175">
+				                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+				                      <tr>
+				                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Reports','images/header_sel_left.gif','images/table_left_edge.gif')))}"></td>
+				                        <td width="88%" nowrap background="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Reports','images/header_background_sel.gif','images/header_background.gif')))}" class="table_heading">
+					                        <apex:outputLink value="/apex/LeaderInfo?section=Reports&pgId=12&impRepNbr={!impRepId}">{!$Label.Tab_Campaign_Reports}</apex:outputLink>
+				                        </td>
+				                        <td width="5%" nowrap><img src="{!URLFOR($Resource.AvonSiteAssets,(IF(section='Reports','images/header_sel_right.gif','images/table_right_edge.gif')))}"></td>
+				                        <td width="2%" nowrap></td>
+				                      </tr>
+				                    </table>          
+			                </td>
+				            </apex:outputPanel>       
+			                <td nowrap="nowrap">{!$Label.Search_by_Name_Account}</td>
+			                <td nowrap="nowrap">
+								<apex:inputText id="contactName" value="{!repName}"/>  
+								<a href="javascript:openLookupWindow()">
+									<apex:image url="{!URLFOR($Resource.AvonSiteAssets,'images/lookup.gif')}"/>
+								</a>
+			                </td>
+			                <td> </td>
+			                <td nowrap="nowrap" width="100">
+			                    <table border="0" cellspacing="0" cellpadding="0">
+			                      <tr>
+			                        <td align="right"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+			                        <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+			                        	<apex:commandLink value="Go" action="{!impersonate}"/>
+			                        </td>
+			                        <td align="left"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+			                      </tr>
+			                    </table>
+			                </td>
+			              </tr>
+			            </table>
+			             <apex:outputPanel rendered="{!OR(IsError,LEN(section)=0)}">
+			            <table width="100%">
+			              <tr>
+				            <td valign="top" align="center">
+			              		<apex:outputText value="{!$Label.Impersonation_Error_Message}" rendered="{!IsError}"/>
+				            </td>
+			              </tr>
+			              <tr>
+			              	<td align="center">
+				              <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/prod.jpg')}" />
+				            </td>
+			              </tr>
+			             
+			            </table>
+			           </apex:outputPanel>
+			   		 </apex:form>
+			        </td>
+			      </tr>
+			 	  <tr>
+			 		<td>
+			 		
+				 		<apex:outputPanel id="currCampaign" rendered="{!AND(section='Current Campaign',currContact.Name!='')}">
+							<c:LdrDownlinePerformance showCurrPerf="true"
+									repAcctNbr="{!currUsr.MRKT_ID__c}{!impRepId}" 
+									salesChartTitle="Downline Award Sales" 
+									salesChart1stGen="{!$Label.1st_Generation}" 
+									salesChart2ndGen="{!$Label.2nd_Generation}"  
+									salesChart3rdGen="{!$Label.3rd_Generation}"  
+									chartCurrent="{!$Label.Current_Campaign}"  
+									chartPrior="{!$Label.Prior_Campaign}"
+									ordersChartTitle="{!$Label.Orders}"
+									undMinLbl="{!$Label.Orders_Under_Minimum}"
+									achMinLbl="{!$Label.Orders_Achieving_Minimum}"
+									onHldLbl="{!$Label.On_Hold}"
+									pendLbl="{!$Label.Pending}"/> 
+						</apex:outputPanel>
+				 		<apex:outputPanel id="genealogy" rendered="{!AND(section='Downline',currContact.Name!='')}">
+							  <c:Genealogy repAcctNbr="{!impRepId}" impersonate="true"/>
+							
+						</apex:outputPanel>
+						<apex:outputPanel id="cmgnReports" rendered="{!AND(section='Reports',currContact.Name!='')}">
+							<c:ASLFReports repAcctNbr="{!impRepId}"/>
+						
+						</apex:outputPanel>
+		  			</td>
+		  		  </tr>
+		  		</table>
+	        </td>
+	      </tr>
+	   </table>
+	   </div>
+	   </apex:define>
+	</apex:composition>
+</apex:page>
+                            	

@@ -1,0 +1,81 @@
+<apex:page controller="MyMessageDetailController" showHeader="false" sidebar="false" action="{!init}">
+<apex:composition template="LeaderPageTemplate">
+<apex:define name="content">
+<table width="70%">
+    <tr>
+        <td align="right"><c:ReturnToPageButton /></td>
+    </tr>
+</table>
+<apex:pageBlock rendered="{!msgType='1'}">
+
+<div id="main_content" class="table_with_scrolls" style="height:450px">
+<apex:pageBlockSection title="{!$Label.Market_Messages}" columns="2" collapsible="false">
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Subject}" for="tsk_subj"/>
+      <apex:outputField value="{!TaskDetail.Subject}" id="tsk_subj"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.ActivityDate}" for="tsk_due_dt"/>
+      <apex:outputField value="{!TaskDetail.ActivityDate}" id="tsk_due_dt"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Status}" for="tsk_sts"/>
+      <apex:outputField value="{!TaskDetail.Status}" id="tsk_sts"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Priority}" for="tsk_priority"/>
+      <apex:outputField value="{!TaskDetail.Priority}" id="tsk_priority"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Description}" for="tsk_desc"/>
+      <apex:outputField value="{!TaskDetail.Description}" id="tsk_desc"/> 
+</apex:pageBlockSectionItem>
+
+    </apex:pageBlockSection>
+</div>
+    </apex:pageBlock>
+<!-- Zishan changed 10/14/2009 Because assign to field was showing-->
+<apex:pageBlock rendered="{!msgType='2'}">
+<div id="main_content_2" class="table_with_scrolls" style="height:480px">
+    <!--<apex:detail relatedList="true"/>-->
+<!-- took this above code out-->
+<apex:pageBlockSection title="My Messages" columns="2" collapsible="false">
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Subject}" for="tsk_subj"/>
+      <apex:outputField value="{!TaskDetail.Subject}" id="tsk_subj"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.ActivityDate}" for="tsk_due_dt"/>
+      <apex:outputField value="{!TaskDetail.ActivityDate}" id="tsk_due_dt"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Status}" for="tsk_sts"/>
+      <apex:outputField value="{!TaskDetail.Status}" id="tsk_sts"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Priority}" for="tsk_priority"/>
+      <apex:outputField value="{!TaskDetail.Priority}" id="tsk_priority"/> 
+</apex:pageBlockSectionItem>
+
+<apex:pageBlockSectionItem >
+      <apex:outputLabel value="{!$Label.Description}" for="tsk_desc"/>
+      <apex:outputField value="{!TaskDetail.Description}" id="tsk_desc"/> 
+</apex:pageBlockSectionItem>
+
+    </apex:pageBlockSection>
+  
+</div>
+</apex:pageBlock>
+    </apex:define>
+</apex:Composition>
+</apex:page>
+                            	

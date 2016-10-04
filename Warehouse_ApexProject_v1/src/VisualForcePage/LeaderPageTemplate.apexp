@@ -1,0 +1,395 @@
+<apex:page showHeader="false" sidebar="false" controller="SiteHeaderController" action="{!init}">
+
+<head>
+<c:PageTitle />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<link rel="stylesheet" media="screen" type="text/css" href="{!$Resource.alm_css}">
+<link rel="stylesheet" media="print" type="text/css" href="{!$Resource.alm_print_css}">
+
+<script type="text/javascript">
+    function openETools(){
+        window.open('/apex/eTools',"eTools","width=950,height=500,status=1,toolbar=0,menubar=0,scrollbars=1,location=0");
+    }
+</script>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<!-- header -->
+<apex:outputPanel rendered="{!AND(LEN($CurrentPage.parameters.print)=0,LEN($CurrentPage.parameters.contentType)=0)}">
+<table width="950" border="0" cellspacing="0" cellpadding="1">
+  <tr>
+    <td width="205"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/logo1.gif')}" alt="Avon_logo" border=0></td>
+    <td width="235"></td>
+    <td width="525">
+    <table width="525" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td colspan="4" valign="top" align="left" height="5"></td>
+      </tr>
+      <tr>
+        <td width="240" valign="top" align="left">
+        <table width="240" border="0" cellpadding="1" cellspacing="0" class="name_box">
+          <tr>
+            <td width="78" nowrap class="data_cell">{!$Label.Name}</td>
+            <td width="162" nowrap>{!currUsr.First_Name__c} {!currUsr.Last_Name__c}</td>
+          </tr>
+          <apex:outputPanel rendered="{!userProfile='Avon Leader'}">
+              <tr>
+                <td width="78" nowrap="nowrap" class="data_cell">{!$Label.Leadership_Title}</td>
+                <td>{!ldrTitle}</td>
+              </tr>
+              <apex:outputPanel rendered="{!LEN(sellerStatus)>0}">
+              <tr>
+                <td width="78"  nowrap class="data_cell">{!$Label.Seller_Status}</td>
+                <td width="162">{!sellerStatus}</td>
+              </tr>
+              </apex:outputPanel>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!LEN(currUsr.DFALT_ZONE_CD__c)>0}">
+          <tr>
+            <td width="78"  nowrap class="data_cell">{!$Label.Market}</td>
+            <td width="162">{!currUsr.DFALT_ZONE_CD__c}</td>
+          </tr>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!LEN(currUsr.DFALT_DIV_NM__c)>0}">
+          <tr>
+            <td width="78"  nowrap class="data_cell">{!$Label.Division}</td>
+            <td width="162"> {!currUsr.DFALT_DIV_NM__c}</td>
+          </tr>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!LEN(usrSlsOrg.SLS_REGN_NM__c)>0}">
+          <tr>
+            <td width="78"  nowrap class="data_cell">{!$Label.Region}</td>
+            <td width="162">{!usrSlsOrg.SLS_REGN_NM__c}</td>
+          </tr>
+          </apex:outputPanel>
+          <!--Zishan Added outputPanel for Country 07/15/09-->
+          <apex:outputPanel rendered="{!LEN(market.Name)>0}">
+          <tr>
+            <td width="78"  nowrap class="data_cell">{!$Label.Country}</td>
+            <td width="162">{!market.Name}</td>
+          </tr>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!LEN(currUsr.MRKT_TAG_1_HDR_TXT__c)>0}">
+          <tr>
+            <td width="78"  nowrap class="data_cell">{!mktTagLabel}</td>
+            <td width="162" >{!currUsr.MRKT_TAG_1_HDR_TXT__c}</td>
+          </tr>
+          </apex:outputPanel>
+        </table>
+        </td>
+        <td width="5"></td>
+        <td width="288" valign="top" align="left">
+        <table width="250" border="0" cellpadding="1" cellspacing="0" class="cmpgn_box">
+          <tr class="header_text">
+            <td width="90%" class="data_cell" nowrap>{!$Label.Selling_Campaign}</td>
+            <td align="right" width="20%" nowrap><apex:outputField value="{!mailPlan.CMPGN_NR__c}"/></td>
+          </tr>
+        <!-- Zishan Change here 07/20/09
+            <apex:outputPanel rendered="{!mailPlan.CURRNT_CMPGN_ONLN_RMN_DAY_CNT__c!=null}">
+         -->
+          <apex:outputPanel rendered="{!NOT(ISNULL(mailPlan.CURRNT_CMPGN_ONLN_RMN_DAY_CNT__c))}">
+          <tr class="header_text">
+            <td width="90%" nowrap class="data_cell">{!$Label.Online_Ord_Days_Remaining}</td>
+            <td align="right" nowrap><apex:outputText value="{!IF((mailPlan.CURRNT_CMPGN_ONLN_RMN_DAY_CNT__c>0),ROUND (mailPlan.CURRNT_CMPGN_ONLN_RMN_DAY_CNT__c, 0),0)}"/></td>
+          </tr>
+          </apex:outputPanel>
+        <!-- Zishan Change 07/20/2009
+            <apex:outputPanel rendered="{!mailPlan.CURRNT_CMPGN_MAIL_RMN_DAY_CNT__c!=null)}">
+        -->    
+          <apex:outputPanel rendered="{!NOT(ISNULL(mailPlan.CURRNT_CMPGN_MAIL_RMN_DAY_CNT__c))}">
+           <tr class="header_text">
+            <td nowrap width="90%" class="data_cell">{!$Label.Mail_Sub_Ord_Days_Remainng}</td>
+            <td align="right" nowrap><apex:outputText value="{!IF((mailPlan.CURRNT_CMPGN_MAIL_RMN_DAY_CNT__c>0),ROUND (mailPlan.CURRNT_CMPGN_MAIL_RMN_DAY_CNT__c, 0),0)}" /></td>
+          </tr>
+            </apex:outputPanel>
+          <apex:outputPanel rendered="{!AND(mailPlan.MLPLN_CD__c!='DFLT',LEN(mailPlan.MLPLN_CD__c)>0)}">
+           <tr class="header_text">
+            <td nowrap width="90%" class="data_cell">{!$Label.Order_Submission}</td>
+            <td align="right" nowrap><apex:outputField value="{!mailPlan.MLPLN_CD__c}"/></td>
+          </tr>
+          </apex:outputPanel>
+          <!-- Added the <apex:outputPanel rendered= part Zishan 07/20/2009-->
+          <apex:outputPanel rendered="{!NOT(ISNULL(market.CURRENT_CAMPAIGN_NR__c))}">
+           <tr class="header_text">
+            <td width="90%" class="data_cell">{!$Label.Order_Processing_Campaign}</td>
+            <td align="right" nowrap><apex:outputField value="{!market.CURRENT_CAMPAIGN_NR__c}"/></td>
+          </tr>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!AND(mailPlansToClose!='DFLT',LEN(mailPlansToClose)>0)}">
+           <tr class="header_text">
+            <td width="85%" class="data_cell">{!$Label.Next_Processing_day_to_close}</td>
+            <td align="right" nowrap><apex:outputText value="{!mailPlansToClose}"/></td>
+          </tr>
+          </apex:outputPanel>
+        </table>  
+        <table width="250" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+           <td colspan="2" align="right">
+                <table width="100%" bgcolor="#FFFFFF" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                        <td width="100%" align="left" nowrap="nowrap">
+                        <img src="{!URLFOR($Resource.AvonSiteAssets,'images/opportunity.gif')}" alt="Earnings Opportunity" width="15" height="16" border=0>
+                        <apex:outputPanel rendered="{!AND($CurrentPage.parameters.pgId!='',userProfile='Avon Leader')}">
+                            <a href="/apex/EarningOppty?pgId=20&retPgId={!$CurrentPage.parameters.pgId}&repAcctNbr={!$CurrentPage.parameters.repAcctNbr}" class="detailLink">{!$Label.Earning_Opportunity}</a>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!AND($CurrentPage.parameters.pgId=='',userProfile='Avon Leader')}">
+                            <a href="/apex/EarningOppty?pgId=20&retPgId=1&repAcctNbr={!$CurrentPage.parameters.repAcctNbr}" class="detailLink">{!$Label.Earning_Opportunity}</a>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!AND($CurrentPage.parameters.pgId!='',OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager'))}">
+                            <a href="/apex/ZoneDivEarningsOppty?pgId=21&retPgId={!$CurrentPage.parameters.pgId}" class="detailLink">{!$Label.Opportunity}</a>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!AND($CurrentPage.parameters.pgId=='',OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager'))}">
+                            <a href="/apex/ZoneDivEarningsOppty?pgId=21&retPgId=8" class="detailLink">{!$Label.Opportunity}</a>
+                        </apex:outputPanel>
+                        </td>
+                        <!-- 
+                        <td>
+                            <a href="/apex/ALMFeedback" target="_blank">Feedback</a>
+                        </td>
+                         -->
+                  </tr>
+                </table>
+            </td>
+          </tr>
+        </table>
+       </td>
+      </tr>
+    </table></td>
+  </tr>
+</table>
+
+
+<!-- tabs -->
+<div style="position:relative;z-index:2">
+<apex:outputPanel rendered="{!OR(userProfile='Avon Leader')}">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='1','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='1','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='1','siteTabOnHdr','siteTabOffHdr')}" href="/apex/MyBusiness?pgId=1">{!$Label.Tab_My_Business}</a></td>
+        <td width="3px" height="25" nowrap="nowrap" ><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='1','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>
+    <td nowrap="nowrap"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='2','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='2','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='2','siteTabOnHdr','siteTabOffHdr')}" href="/apex/LeaderDownline?pgId=2">{!$Label.Tab_Downline_Perf}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='2','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+
+      </tr>
+    </table>
+    </td>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='3','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='3','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='3','siteTabOnHdr','siteTabOffHdr')}" href="/apex/LdrDownlineAnalysis?pgId=3&section=Orders">{!$Label.Tab_Downline_Analysis}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='3','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td> 
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='4','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='4','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='4','siteTabOnHdr','siteTabOffHdr')}" href="/apex/LeaderMyDownline?pgId=4">{!$Label.Tab_My_Downline}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='4','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='5','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='5','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='5','siteTabOnHdr','siteTabOffHdr')}" href="/apex/CampaignReports?pgId=5">{!$Label.Tab_Rep_Campaign_Reports}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='5','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>                
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='6','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='6','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='6','siteTabOnHdr','siteTabOffHdr')}" href="/apex/MyMessage?pgId=6&repAcctNbr={!$CurrentPage.parameters.repAcctNbr}">{!$Label.Tab_Msgs_From_Avon}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='6','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>                
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='7','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='7','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='7','siteTabOnHdr','siteTabOffHdr')}" href="javascript:openETools()">{!$Label.Tab_eTools}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='7','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>                
+  </tr>
+    <tr>
+    <td colspan=7 style="height:3px; background-color:#ec008c"></td>
+    </tr>
+  
+</table>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager')}">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='8','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='8','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='8','siteTabOnHdr','siteTabOffHdr')}" href="/apex/SalesOrgActivity?pgId=8">
+            <apex:outputText value="{!$Label.Tab_Market_Activity}" rendered="{!userProfile='Avon Zone Manager'}"/>
+            <apex:outputText value="{!$Label.Tab_Division_Activity}" rendered="{!userProfile='Avon Division Manager'}"/>
+            
+            </a></td>
+        <td width="3px" height="25" nowrap="nowrap" ><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='8','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>
+    <td nowrap="nowrap"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='9','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='9','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='9','siteTabOnHdr','siteTabOffHdr')}" href="/apex/LdrshipActivity?pgId=9">{!$Label.Tab_Leadership_Activity}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='9','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+
+      </tr>
+    </table>
+    </td>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='10','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='10','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='10','siteTabOnHdr','siteTabOffHdr')}" href="/apex/MarketAnalysis?pgId=10&section=Orders">{!$Label.Tab_Analysis}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='10','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td> 
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='11','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='11','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='11','siteTabOnHdr','siteTabOffHdr')}" href="/apex/MyMarket?pgId=11">
+            <apex:outputText value="{!$Label.Tab_My_Market}" rendered="{!userProfile='Avon Zone Manager'}"/>
+            <apex:outputText value="{!$Label.Tab_My_Division}" rendered="{!userProfile='Avon Division Manager'}"/>
+            </a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='11','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='12','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='12','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}"> 
+            <a class="{!IF($CurrentPage.parameters.pgId='12','siteTabOnHdr','siteTabOffHdr')}" href="/apex/LeaderInfo?pgId=12">{!$Label.Tab_Leaders_Information}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='12','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='5','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='5','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='5','siteTabOnHdr','siteTabOffHdr')}" href="/apex/CampaignReports?pgId=5">{!$Label.Tab_Campaign_Reports}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='5','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>                
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='6','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='6','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='6','siteTabOnHdr','siteTabOffHdr')}" href="/apex/MyMessage?pgId=6">{!$Label.Tab_Msgs_Zone}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='6','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>                
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='7','images/tab_sel_left.gif','images/tab_desel_left.gif')))}" width="14" height="27" /></td>
+        <td height="25" nowrap="nowrap" 
+            background="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='7','images/tab_sel_fill.gif','images/tab_desel_fill.gif')))}">
+            <a class="{!IF($CurrentPage.parameters.pgId='7','siteTabOnHdr','siteTabOffHdr')}" href="javascript:openETools()">{!$Label.Tab_eTools}</a></td>
+        <td width="3px" height="25" nowrap="nowrap"><img src="{!URLFOR($Resource.AvonSiteAssets,(IF($CurrentPage.parameters.pgId='7','images/tab_sel_right.gif','images/tab_desel_right.gif')))}" width="15" height="27" /></td>
+      </tr>
+    </table>
+    </td>                
+  </tr>
+    <tr>
+    <td colspan=8 style="height:3px; background-color:#ec008c"></td>
+    </tr>
+    
+  
+</table>
+</apex:outputPanel>
+
+</div>
+</apex:outputPanel>
+<!-- main body -->
+  <div id="content_container" style="height:500px;">
+    <apex:insert name="content"/>
+  </div>
+<!-- footer -->
+<apex:outputPanel rendered="{!AND(LEN($CurrentPage.parameters.print)=0,LEN($CurrentPage.parameters.contentType)=0)}">
+<div style="position:relative;z-index:2">
+<table id="Table_01" width="950" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+    <td colspan=7 style="height:3px; background-color:#ec008c"></td>
+    </tr>
+    <tr style="background-color:#000000;">
+    <td align="left">
+    <table cellpadding="1" cellspacing="1">
+    <td class="footer">&copy;2009 Avon Products, Inc.  </td>
+    <td class="footer"> | <a class="footer" href="/apex/ShowMarketDocument?type=Security+and+Privacy" target="_blank">{!$Label.Security_and_Privacy}</a></td>
+    <td class="footer"> | <a class="footer" href="/apex/ShowMarketDocument?type=Terms+and+Conditions" target="_blank">{!$Label.Conditions_of_Use}</a></td>
+    </table>
+    </td>
+    <td align="right">
+    <table cellpadding="1" cellspacing="1">
+    <td class="footer">{!$Label.Last_Updated} : <apex:outputField value="{!market.LAST_UPDT_DT__c}"/> </td>
+    <!-- Modified by Sabyasachi Maji on 11/13/2009 ; Code added to build up Download page functionality. -->
+    <apex:outputPanel rendered="{!OR($CurrentPage.parameters.pgId='1',$CurrentPage.parameters.pgId='2',$CurrentPage.parameters.pgId='3',$CurrentPage.parameters.pgId='8',$CurrentPage.parameters.pgId='9',$CurrentPage.parameters.pgId='10')}">
+    <td class="footer">| <a class="footer" href="/apex/DownloadPage?pgId={!$CurrentPage.parameters.pgId}&section={!$CurrentPage.parameters.section}" target="_blank">{!$Label.Download}</a></td>
+    </apex:outputPanel>
+    <!-- End of added code:  by Sabyasachi Maji on 11/13/2009 ; Code added to build up Download page functionality. -->
+    <td class="footer">| <a class="footer" href="javascript:window.print()">{!$Label.Print_Page}</a></td>
+    <td class="footer">| <a class="footer" href="/apex/UpdateUserPreferences?retPgId={!$CurrentPage.parameters.pgId}">{!$Label.Profile}</a></td>
+    <td class="footer">| 
+    <apex:outputLink styleClass="footer" value="/apex/ShowMarketDocument?type=Help&pgId={!$CurrentPage.parameters.pgId}" target="_blank">{!$Label.Help}</apex:outputLink>
+    </table>
+    </tr>
+    
+</table>
+<c:OmnitureWebTrack market="{!market.Name}" mktAcctKey="{!currUsr.MRKT_ID_ACCT_NR_KEY__c}" rendered="{!globalConfig.Omniture_Tracking_Enabled__c}"/>
+<apex:outputPanel rendered="{!AND(LEN(market.GI3_Keep_Alive_URL__c)>0,userProfile='Avon Leader')}">
+    <iframe src="{!market.GI3_Keep_Alive_URL__c}/SLSuite/keepAlive.jsp" height="0" width="0"/>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!AND(LEN(market.GI3_Keep_Alive_URL__c)>0,OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager'))}">
+    <iframe src="{!market.GI3_Keep_Alive_URL__c}/ZMSuite/keepAlive.jsp" height="0" width="0"/>
+</apex:outputPanel>
+</div>
+</apex:outputPanel>
+</body>
+
+
+</apex:page>
+                            	

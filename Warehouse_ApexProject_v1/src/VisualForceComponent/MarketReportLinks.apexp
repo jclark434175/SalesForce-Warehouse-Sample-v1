@@ -1,0 +1,63 @@
+<apex:component controller="MarketReportLinks">
+    <apex:attribute name="marketId" assignTo="{!marketId}" description="Market Id" type="string" required="true" />
+    <apex:attribute name="rpt2Display" assignTo="{!rpt2Display}" description="List of report names to display" type="string" required="false" />
+    <apex:attribute name="allReports" assignTo="{!allReports}" description="Display All Reports Link" type="Boolean" required="false" default="true" />
+    <apex:attribute name="retURL" assignTo="{!retURL}" description="Return URL" type="String" required="false" default="false" />
+
+    {!Initialize}
+    <table width="80%" border="0" cellspacing="0" cellpadding="1">
+       <apex:outputPanel rendered="{!allReports}">
+       <tr>
+         <td bgcolor="#333333" class="table_heading">{!$Label.Development_Opportunities}</td>
+       </tr>
+       </apex:outputPanel>
+      <tr id="spacer">
+        <td height="5"></td>
+      </tr>
+    <apex:repeat value="{!reportList}" var="rptCfg">
+      <tr>
+            <td class="detailText">
+                <a href="/apex/DrilldownReport?pgId=101&retPgId={!$CurrentPage.parameters.pgId}&rptId={!rptCfg.Report_Id__c}">
+                                    <apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!OR(rptCfg.Report_Type__c='Orders_Not_Submitted',rptCfg.Report_Type__c='AI_Orders_Not_Submitted')}"/>
+                                    <apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!OR(rptCfg.Report_Type__c='Orders_on_Hold',rptCfg.Report_Type__c='AI_Orders_on_Hold')}"/>
+                                    <apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!OR(rptCfg.Report_Type__c='Orders_below_Minimum',rptCfg.Report_Type__c='AI_Orders_below_Minimum')}"/>
+                                    <apex:outputText value="{!$Label.Orders_at_Minimum}" rendered="{!OR(rptCfg.Report_Type__c='Orders_at_Minimum',rptCfg.Report_Type__c='AI_Orders_at_Minimum')}"/>
+                                    <apex:outputText value="{!$Label.Pending_Orders}" rendered="{!OR(rptCfg.Report_Type__c='Pending_Orders',rptCfg.Report_Type__c='AI_Pending_Orders')}"/>
+                                    <apex:outputText value="{!$Label.Total_Orders_Received}" rendered="{!OR(rptCfg.Report_Type__c='Total_Orders_received',rptCfg.Report_Type__c='AI_Total_Orders_received')}"/>
+                                    <apex:outputText value="{!$Label.Return_Orders}" rendered="{!OR(rptCfg.Report_Type__c='Return_Orders',rptCfg.Report_Type__c='AI_Return_Orders')}"/>
+                                    <apex:outputText value="{!$Label.Achieved_Minimum_Order}" rendered="{!OR(rptCfg.Report_Type__c='Achieved_Minimum_Order',rptCfg.Report_Type__c='AI_Achieved_Minimum_Order')}"/>
+                                    <apex:outputText value="{!$Label.Balance_Past_Due}" rendered="{!OR(rptCfg.Report_Type__c='Balance_Past_Due',rptCfg.Report_Type__c='AI_Balance_Past_Due')}"/>
+                                    <apex:outputText value="{!$Label.Personal_Sales_Qual}" rendered="{!rptCfg.Report_Type__c='Personal_Sales_Qual'}"/>
+                                    <apex:outputText value="{!$Label.Returns}" rendered="{!OR(rptCfg.Report_Type__c='Returns',rptCfg.Report_Type__c='AI_Returns')}"/>
+                                    <!--Zishan Added 8/19/2009--> 
+                                    <!--<apex:outputText value="{!$Label.Additions_Reinstatements_Removals}" rendered="{!rptCfg.Report_Type__c='Additions_Reinstatements'}"/>--> 
+                                    <apex:outputText value="{!$Label.Additions_Reinstatements_Removals}" rendered="{!rptCfg.Report_Type__c='Additions_Reinstatements'}"/> 
+                                    <apex:outputText value="{!$Label.Birthday_Anniversaries}" rendered="{!rptCfg.Report_Type__c='Birthday_Anniversaries'}"/>
+                                    <apex:outputText value="{!$Label.Candidate_Development}" rendered="{!rptCfg.Report_Type__c='Candidate_Development'}"/>
+                                    <apex:outputText value="{!$Label.Development_LOA_1_6}" rendered="{!rptCfg.Report_Type__c='Development_LOA_1_6'}"/>
+                                    <apex:outputText value="{!$Label.Downline_Detail}" rendered="{!rptCfg.Report_Type__c='Downline_Detail'}"/>
+                                    <apex:outputText value="{!$Label.Inactive}" rendered="{!rptCfg.Report_Type__c='Inactive'}"/>
+                                    <apex:outputText value="{!$Label.Inherited}" rendered="{!rptCfg.Report_Type__c='Inherited'}"/>
+                                    <apex:outputText value="{!$Label.PATD_Certified}" rendered="{!rptCfg.Report_Type__c='PATD_Certified'}"/>
+                                    <apex:outputText value="{!$Label.Ranking_and_Recognition}" rendered="{!rptCfg.Report_Type__c='Ranking_and_Recognition'}"/>
+                                    <apex:outputText value="{!$Label.Title_Change}" rendered="{!rptCfg.Report_Type__c='Title_Change'}"/>
+                                    <!--  Changed by Sabyasachi Maji on 09 Sep 2009 -->
+									<apex:outputText value="{!$Label.Romania_Brochures_Not_Purchased}" rendered="{!rptCfg.Report_Type__c='Brochures_Not_Purchased'}"/>
+									<!-- Changed by Snehashis Ghosh on 09 Sep 2009 -->
+									<apex:outputText value="{!$Label.Romania_1st_Order_Award_Sales}" rendered="{!rptCfg.Report_Type__c='1st_Order_Award_Sales'}"/>
+									<apex:outputPanel rendered="{!CONTAINS(rptCfg.Report_Type__c,'AI_')}">
+									( {!$Label.Next} {!nbrMplans} {!$Label.Mail_Plans} )
+									</apex:outputPanel>
+                </a>
+        </td>
+      </tr>
+    </apex:repeat>
+  <apex:outputPanel rendered="{!allReports}">
+      <tr>
+            <td class="detailText"><a href="/apex/ALMReports?pgId=30&retPgId={!$CurrentPage.parameters.pgId}">{!$Label.All_Reports}</a></td>
+      </tr>
+    </apex:outputPanel>
+    </table>
+    
+</apex:component>
+                             	

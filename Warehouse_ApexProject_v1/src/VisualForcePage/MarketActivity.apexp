@@ -1,0 +1,213 @@
+<apex:page showHeader="false" sidebar="false" controller="SalesOrgActivityController" action="{!init}"
+			cache="true" contenttype="{!$CurrentPage.parameters.contentType}">
+    <apex:composition template="LeaderPageTemplate">
+        <apex:define name="content">
+           <table width="1000" border="0" cellspacing="0" cellpadding="1">
+              <tr>
+                <td colspan="3" height="5"></td>
+              </tr>
+              <tr>
+                <td width="3"></td>
+                <td width="925" align="left" valign="top">
+                    <table width="925" border="0" cellspacing="0" cellpadding="1">
+                      <tr colspan="{!enabledColCount}">
+                        <td>
+                            <!--  Table Heading -->
+                            <table width="932" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                    <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Current_Markets_Performance}</td>
+                                    <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                                    </td>
+                                </tr>
+                            </table>                        
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="925">
+                            <!--  Table Column Headers -->
+                            <table width="925" border="0" cellspacing="0" cellpadding="0">
+                              <tr class="information_header">
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+                                    <td width="45">{!$Label.Plan}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_PC_Enabled__c}">
+                                    <td width="45">{!$Label.Prior_Campaign}</td>
+                                </apex:outputPanel>
+                                <td width="160" align="left" nowrap="nowrap">{!$Label.Perf_Info}</td>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+                                    <td width="75">{!$Label.Plan}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_CC_Enabled__c}">
+                                    <td width="75" bgcolor="#f8dfdf">{!$Label.Current_Campaign}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_PC_Enabled__c}">
+                                    <td width="75">{!$Label.Prior_Campaign}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_SPPY_Enabled__c}">
+                                    <td width="75">{!$Label.SPPY_Campaign}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+                                    <td width="75" bgcolor="#f8dfdf">{!$Label.Leadership}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+                                    <td width="75" bgcolor="#f8dfdf">%</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+                                    <td width="75">{!$Label.Non_Leadership}</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+                                    <td width="75">%</td>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!market.Mkt_Actvty_NC_Enabled__c}">
+                                    <td width="75">{!$Label.Next_Campaign}</td>
+                                </apex:outputPanel>
+                              </tr>
+                            </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="925">
+                            <!--  Table Data with the Scroll Bars -->
+                            <div class="table_with_scrolls" style="width:960px; height:415px">
+                            <table width="925" border="0" cellspacing="0" cellpadding="0">
+                            <apex:repeat value="{!activityRows}" var="row">
+                                <tr class="{!IF(row.dataRec.Odd_Row__c,'display_row_odd','display_row_even')}">
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+                                        <td class="data_cell" width="45">
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}"
+                                            alt="" width="10" height="13"
+                                            rendered="{!row.PlanUpDownInd='UP'}" /> 
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}"
+                                            alt="" width="10" height="13"
+                                            rendered="{!row.PlanUpDownInd='DOWN'}" />
+                                         
+                                        </td>
+                                    </apex:outputPanel>
+            
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_PC_Enabled__c}">
+                                        <td class="data_cell"  width="45">
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}"
+                                            alt="" width="10" height="13" rendered="{!row.PCUpDownInd='UP'}" />
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}"
+                                            alt="" width="10" height="13"
+                                            rendered="{!row.PCUpDownInd='DOWN'}" />
+                                         
+                                        </td>
+                                    </apex:outputPanel>
+                                    <td class="data_cell" width="160" align="left">
+                                        <apex:outputText value="{!$Label.Award_Sales}" rendered="{!row.dataRec.Row_Label__c = 'Award Sales'}" />
+                                        <apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.dataRec.Row_Label__c = 'Net Sales'}" />
+                                        <apex:outputText value="{!$Label.Active_Representatives}" rendered="{!row.dataRec.Row_Label__c = 'Active Representatives'}" />
+                                        <apex:outputText value="{!$Label.Activity}" rendered="{!row.dataRec.Row_Label__c = 'Activity'}" />
+                                        <apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!row.dataRec.Row_Label__c = 'Orders not Submitted'}" />
+                                        <apex:outputText value="{!$Label.Orders_submitted}" rendered="{!row.dataRec.Row_Label__c = 'Orders Submitted'}" />
+                                        <apex:outputText value="{!$Label.New_Rep_1st_Order_In_Market}" rendered="{!row.dataRec.Row_Label__c = 'New Representative 1st Order - In Market'}" />
+                                        <apex:outputText value="{!$Label.New_Rep_1st_Order_Out_Market}" rendered="{!row.dataRec.Row_Label__c = 'New Representative 1st Order - Out of Market'}" />
+                                        <apex:outputText value="{!$Label.Paid_Sales}" rendered="{!row.dataRec.Row_Label__c = 'Paid Sales'}" />
+                                        <apex:outputText value="{!$Label.Average_Order}" rendered="{!row.dataRec.Row_Label__c = 'Average Order'}" />
+                                        <apex:outputText value="{!$Label.Past_Due_Amount}" rendered="{!row.dataRec.Row_Label__c = 'Past Due Amount'}" />
+                                        <apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!row.dataRec.Row_Label__c = 'Orders on Hold'}" />
+                                        <apex:outputText value="{!$Label.Appointments}" rendered="{!row.dataRec.Row_Label__c = 'Appointments'}" />
+                                        <apex:outputText value="{!$Label.Reinstatements}" rendered="{!row.dataRec.Row_Label__c = 'Reinstatements'}" />
+                                        <apex:outputText value="{!$Label.Removals}" rendered="{!row.dataRec.Row_Label__c = 'Removals'}" />
+                                        <apex:outputText value="{!$Label.Total_Representatives}" rendered="{!row.dataRec.Row_Label__c = 'Total Representatives'}" />
+                                        <apex:outputText value="{!$Label.Avg_Customer_Served}" rendered="{!row.dataRec.Row_Label__c = 'Average Customers Served'}" />
+                                        <apex:outputText value="{!$Label.Returns}" rendered="{!row.dataRec.Row_Label__c = 'Returns'}" />
+                                        <apex:outputText value="{!$Label.Balance_Due}" rendered="{!row.dataRec.Row_Label__c = 'Balance Due'}" />
+                                        <apex:outputText value="{!$Label.Leadership_Earnings}" rendered="{!row.dataRec.Row_Label__c = 'Leadership Earnings'}" />
+
+                                        <apex:outputText value="{!row.dataRec.Row_Label__c}" rendered="{!row.dataRec.Is_Market_Tag__c}"/>
+                                    </td>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+                                        <td class="data_cell"  width="75">
+                                            <apex:outputField value="{!row.dataRec.Plan_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.Plan_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.Plan_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_CC_Enabled__c}">
+                                        <td class="data_cell"  width="75">
+                                            <apex:outputField value="{!row.dataRec.CC_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.CC_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.CC_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_PC_Enabled__c}">
+                                        <td class="data_cell" width="75">
+                                            <apex:outputField value="{!row.dataRec.PC_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.PC_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.PC_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_SPPY_Enabled__c}">
+                                        <td class="data_cell" width="75">
+                                            <apex:outputField value="{!row.dataRec.SPPY_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.SPPY_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.SPPY_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+                                        <td class="data_cell"  width="75">
+                                            <apex:outputField value="{!row.dataRec.Ldr_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.Ldr_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.Ldr_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+                                        <td class="data_cell"  width="75">
+                                        <!--   LdtTitle1_AMT used to store the %age-->
+                                            <apex:outputField value="{!row.dataRec.LdtTitle1_AMT__c}"/> % 
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+                                        <td class="data_cell"  width="75">
+                                            <apex:outputField value="{!row.dataRec.NonLdr_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.NonLdr_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.NonLdr_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+                                        <td class="data_cell"  width="75">
+                                        <!--   LdtTitle2_AMT used to store the %age-->
+                                            <apex:outputField value="{!row.dataRec.LdtTitle2_AMT__c}"/> %
+                                        </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!market.Mkt_Actvty_NC_Enabled__c}">
+                                        <td class="data_cell" width="75">
+                                            <apex:outputField value="{!row.dataRec.NC_AMT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.NC_CNT__c}"/> 
+                                            <apex:outputField value="{!row.dataRec.NC_TXT__c}"/>
+                                        </td>
+                                    </apex:outputPanel>
+                                </tr>
+            
+                            </apex:repeat>
+                              <tr>
+                                <td width="925" colspan="{!enabledColCount}">
+                                    <c:MarketActivityChart salesTitle="{!$Label.Net_Sales}"
+                                                            repTitle="{!$Label.Total_Representatives}"
+                                                            ordersTitle="{!$Label.Orders_submitted}"
+                                                            chartCurrent="{!$Label.Current_Campaign}"
+                                                            chartPrior="{!$Label.Prior_Campaign}"
+                                                            ldrLbl="{!$Label.Leadership}"
+                                                            nonLdrLbl="{!$Label.Non_Leadership}"
+                                                            salesOrgActivity="{!currRec}"/>
+                                <td>
+                              </tr>
+                            </table>
+                            </div>                
+                        </td>
+                      </tr>
+                    </table>
+                </td>
+                <td width="400" align="left" valign="top">
+                    <!-- <c:ActionItems repAcctNbr="{!$CurrentPage.parameters.repAcctNbr}" summaryObject="{!ldrSmryRec}"/>        -->
+                </td>
+              </tr>
+            </table>
+            
+        </apex:define>
+    </apex:composition>
+</apex:page>
+                            	

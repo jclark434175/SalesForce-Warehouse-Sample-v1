@@ -1,0 +1,8 @@
+<apex:page showHeader="false" sidebar="false">
+	<apex:composition template="LeaderPageTemplate">
+			<apex:define name="content">
+				<apex:pageMessage summary="{!$Label.System_Error_Msg}" severity="error" strength="3" />
+        	</apex:define>
+	</apex:composition>
+</apex:page>
+                            	

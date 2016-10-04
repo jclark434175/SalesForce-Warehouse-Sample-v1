@@ -1,0 +1,479 @@
+<apex:component controller="LdrDownlinePerfController">
+<apex:attribute name="showCurrPerf" type="Boolean"
+    required="false" default="true" description="Flag to disable current performance section" />
+<apex:attribute name="repAcctNbr" type="String" assignTo="{!repAcctNbr}" 
+    required="true" description="This is the account Nbr of the Leader" />
+<apex:attribute name="salesChartTitle" type="String" assignTo="{!salesChartTitle}" 
+    required="true" description="Title of the Award Sales" />
+<apex:attribute name="salesChart1stGen" type="String" assignTo="{!salesChart1stGen}" 
+    required="true" description="Title for 1st Generation" />
+<apex:attribute name="salesChart2ndGen" type="String" assignTo="{!salesChart2ndGen}" 
+    required="true" description="Title for 2nd Generation" />
+<apex:attribute name="salesChart3rdGen" type="String" assignTo="{!salesChart3rdGen}" 
+    required="true" description="Title for 3rd Generation" />
+<apex:attribute name="chartCurrent" type="String" assignTo="{!chartCurrent}" 
+    required="true" description="Title for Current Campaign" />
+<apex:attribute name="chartPrior" type="String" assignTo="{!chartPrior}" 
+    required="true" description="Title for Prior Campaign" />
+<apex:attribute name="ordersChartTitle" type="String"
+    required="true" description="Orders Chart Title" />
+<apex:attribute name="achMinLbl" type="String" assignTo="{!achMinLbl}" 
+    required="true" description="Achieving Minimum Label" />
+<apex:attribute name="undMinLbl" type="String" assignTo="{!undMinLbl}" 
+    required="true" description="Under Minimum Label" />
+<apex:attribute name="onHldLbl" type="String" assignTo="{!onHldLbl}" 
+    required="true" description="On Hold Label" />
+<apex:attribute name="pendLbl" type="String" assignTo="{!pendLbl}" 
+    required="true" description="Pending Label" />
+
+<!-- 
+This is a dummy call so that all the data get's initialized. 
+TODO: Need to determine if there is a better way to do this
+ -->
+<apex:outputText value="{!Initialize}"/>
+
+<apex:outputPanel rendered="{!LEN($CurrentPage.parameters.download)=0}">
+<script type="text/javascript" src="{!URLFOR($Resource.Ext_JS)}"></script>
+<script type="text/javascript">
+	Ext.BLANK_IMAGE_URL = '{!URLFOR($Resource.Ext_Resources,'images/s.gif')}';
+</script>
+
+<link href="{!URLFOR($Resource.Ext_Css)}" rel="stylesheet" type="text/css" />
+
+
+
+
+<table width="950" border="0" cellspacing="0" cellpadding="1">
+<tr>
+<td colspan="3" height="5" id="spacing_from_header"></td>
+</tr>
+<tr>
+    <td width="2" id="spacer_left"> </td>
+    <td align="left" valign="top" width="725">
+        <table width="100%" border="0" cellspacing="0" cellpadding="1">
+            <tr>
+                <td align="left" valign="top">
+                    <table width="750" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                            <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Downline_Performance}</td>
+                            <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td align="left" valign="top">
+                    <div id="loading_msg" style="visibility:visible">
+                          <table width="100%" border="0" cellpadding="0" cellspacing="1">
+                            <tr align="center" >
+                              <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/processing.gif')}"></td>
+                            </tr>
+                            <tr align="center" >
+                              <td>{!$Label.Processing_Status_Message}</td>
+                            </tr>
+                          </table>
+                    </div>
+                    <div id="grid-panel" style="height:459px;visibility:hidden">
+                        <div id="alm_data_table"></div>
+                        <div id="chart-panel">
+                         <table>
+                             <tr>
+                                 <td>
+                                     <c:ColumnChart jsondata="{!salesChartData}"
+                                                    title="{!salesChartTitle}"
+                                                    is3d="true"
+                                                    legend="bottom"
+                                                    width="350"/>
+                                 </td>
+                                 <td> 
+                                     <c:ColumnChart jsondata="{!orderChartData}"
+                                                    title="{!ordersChartTitle}"
+                                                    is3d="true"
+                                                    width="350"
+                                                    legend="bottom"/>
+                                 </td>
+                             </tr>
+                         </table>
+                        </div>
+                   </div>
+            </td>
+        </tr>
+    </table>
+    </td>
+    <apex:outputPanel rendered="{!showCurrPerf}">
+        <td align="left" width="1"></td>
+        <td align="left" valign="top">
+            <table width="190" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="190" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading" nowrap="nowrap">{!currTitle.LCL_LDRSHP_TITL_LANG_DESC_TXT__c}</td>
+                                <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <td style="height:2px; background-color:#FFFFFF" colspan=3></td>
+                <tr>
+                    <td align="left" valign="top">
+                      <table id="my_perf_header" width="190" border="0" cellpadding="0" cellspacing="0">
+                            <tr class="information_header" >
+                                  <td align="left" width="100" class="info_header_left">{!$Label.Title}</td>
+                                  <td width="75">{!$Label.Current}</td>
+                                  <!--  <td class="data_cell" width="75">{!$Label.Current_Level}</td>-->
+                                    <td width="15"></td>
+                                  <!--  <td class="data_cell" width="75">{!$Label.Next_Level}</td>-->
+                            </tr>
+                            <apex:repeat value="{!myPerfRows}" var="row">
+                                <tr class="{!IF(row.myBusRec.Odd_Row__c,'display_row_odd','display_row_even')}">
+                                  <td width="100" class="data_cell" align="left">
+                                        <apex:outputText value="{!$Label.Personal_Qualifier}" rendered="{!row.myBusRec.Row_Label__c = 'Personal Qualifier'}" />
+                                        <apex:outputText value="{!$Label.Group_Qualifiers}" rendered="{!row.myBusRec.Row_Label__c = 'Group Qualifiers'}" />
+                                        <apex:outputText value="{!$Label.X1st_Gen_Active}" rendered="{!row.myBusRec.Row_Label__c = 'Downline'}" />
+                                        <apex:outputText value="{!$Label.X1st_level_titled}" rendered="{!row.myBusRec.Row_Label__c = '1st Level Titled'}" />
+                                        <apex:outputText value="{!$Label.X2nd_level_titled}" rendered="{!row.myBusRec.Row_Label__c = '2nd Level Titled'}" />
+                                        <apex:outputText value="{!$Label.X3rd_level_titled}" rendered="{!row.myBusRec.Row_Label__c = '3rd Level Titled'}" />
+                                        <apex:outputText value="{!row.myBusRec.Row_Label__c}" rendered="{!row.myBusRec.Is_Market_Tag__c}"/>
+                                  </td>
+                                   <td width="75" class="data_cell">
+                                    <apex:outputField value="{!row.myBusRec.CC_Amt__c}"/> 
+                                    <apex:outputField value="{!row.myBusRec.CC_Cnt__c}"/> 
+                                  </td>
+                                  <!--  
+                                  <td width="75" class="data_cell">
+                                    <apex:outputField value="{!row.myBusRec.PC_Amt__c}"/> 
+                                    <apex:outputField value="{!row.myBusRec.PC_Cnt__c}"/> 
+                                  </td>
+                                  --> 
+                                    
+                                  <td width="15" class="data_cell">
+                                  
+                                  <apex:outputPanel rendered="{!market.Current_Perf_Next_Level_Enabled__c}">
+                                    <apex:image id="theImage" value="{!URLFOR($Resource.AvonSiteAssets,'images/green_check1.gif')}"  
+                                        rendered="{!IF(OR(row.myBusRec.CC_Amt__c>=row.myBusRec.PC_Amt__c,row.myBusRec.CC_Cnt__c>=row.myBusRec.PC_Cnt__c),true,false)}">
+                                    </apex:image>
+                                  </apex:outputPanel>
+                                  </td>
+                                  <!--  <td width="75" class="data_cell">
+                                    <apex:outputField value="{!row.myBusRec.NC_Amt__c}"/> 
+                                    <apex:outputField value="{!row.myBusRec.NC_Cnt__c}"/> 
+                                  </td>
+                                  -->
+                                </tr>
+                            </apex:repeat>
+                            <tr>
+                                <td colspan="4" height="5"/>
+                            </tr>
+                            <tr>
+                                <td colspan="4">
+                                    <a class="detailLink" href="/apex/ShowMarketDocument?type=Calculating+Potential" target="_blank">{!$Label.Calculating_My_Potential}</a>
+                                </td>
+                            </tr>
+                      </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        </apex:outputPanel>
+        </tr>
+    </table>
+</table>
+<script type="text/javascript">
+    var myData = new Array();
+    var colHeaderMap = {
+        'Group Award Sales':'{!$Label.Group_Award_Sales}' ,
+        'Activity' :'{!$Label.Activity}' , 
+        'Net Sales':'{!$Label.Net_Sales}' ,
+        'Orders Under Minimum' :'{!$Label.Orders_Under_Minimum}' , 
+        'Orders Achieving Minimum' :'{!$Label.Orders_Achieving_Minimum}' , 
+        'Orders Not Submitted' :'{!$Label.Orders_Not_Submitted}' , 
+        'Orders on Hold' :'{!$Label.Orders_on_Hold}' , 
+        'Return Net Sales' :'{!$Label.Return_net_sales}' , 
+        'Customers Served' :'{!$Label.Customers_Served}' , 
+        'Past Due Amount':'{!$Label.Past_Due_Amount}' ,
+        'Appointments' :'{!$Label.Appointments}' , 
+        'Reinstatements' :'{!$Label.Reinstatements}' , 
+        'Removals' :'{!$Label.Removals}' , 
+        'Title Changes':'{!$Label.Title_Changes}' ,
+        'In Zone':'{!$Label.In_Zone}' ,
+        'Out of Zone':'{!$Label.Out_of_Zone}' ,
+        'Total Downline' :'{!$Label.Total_Downline}' , 
+        'Earnings Paid':'{!$Label.Earnings_Paid}' ,
+        'Potential Earnings' :'{!$Label.Potential_Earnings}' , 
+        'Active Representatives' :'{!$Label.Active_Representatives}' , 
+        'Orders with Multiples':'{!$Label.Orders_with_Multiples}' ,
+        'Title / Status Promoted':'{!$Label.Title_Status_Promoted}' ,
+        'Title / Status Demoted' :'{!$Label.Title_Status_Demoted}' , 
+        'Paid Sales':'{!$Label.Paid_Sales}'
+    };
+</script>            
+<apex:repeat value="{!myBusinessRows}" var="row">
+<script type="text/javascript">
+    var rowData = new Array();
+    var kpiName = '';
+    var isMarketTag = {!row.myBusRec.Is_Market_Tag__c};
+    var rowType = '{!row.myBusRec.Row_Label__c}';
+    kpiName = colHeaderMap[rowType];
+    if(!kpiName || kpiName.length==0 ||isMarketTag){
+        kpiName='{!row.myBusRec.Row_Label__c}';
+    }
+    rowData.push('{!row.PCUpDownInd}-{!row.reverseTrend}');
+    rowData.push('{!row.SPPYUpDownInd}-{!row.reverseTrend}');
+    rowData.push(kpiName);
+
+    var fldVal = '<apex:outputField value="{!row.myBusRec.CC_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);
+
+    fldVal = '<apex:outputField value="{!row.myBusRec.PC_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.PC_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.PC_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);
+
+    fldVal = '<apex:outputField value="{!row.myBusRec.SPPY_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.SPPY_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.SPPY_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);
+
+    fldVal = '<apex:outputField value="{!row.myBusRec.CC_1st_Gen_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_1nd_Gen_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_1st_Gen_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);
+
+    fldVal = '<apex:outputField value="{!row.myBusRec.CC_2nd_Gen_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_2nd_Gen_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_2nd_Gen_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);
+
+    fldVal = '<apex:outputField value="{!row.myBusRec.CC_3rd_Gen_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_3rd_Gen_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.CC_3rd_Gen_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);
+
+    fldVal = '<apex:outputField value="{!row.myBusRec.NC_Amt__c}"/>'+'<apex:outputField value="{!row.myBusRec.NC_Cnt__c}"/>'+'<apex:outputField value="{!row.myBusRec.NC_Txt__c}"/>';
+    if(rowType=='Activity' && fldVal!=''){
+        fldVal+='%';
+    }
+    rowData.push(fldVal);   
+
+    myData.push(rowData);
+
+</script>
+</apex:repeat>
+<script type="text/javascript">
+/*
+ * Ext JS Library 1.1.1
+ * Copyright(c) 2006-2007, Ext JS, LLC.
+ * licensing@extjs.com
+ * 
+ * http://www.extjs.com/license
+ */
+    function trendRenderer(value,metaData,record,rowIndex,colIndex,dataStore){
+        var imgPath ='';
+        if(value=='UP-false'){
+            imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}";
+        }else if(value=='UP-true'){
+            imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}";
+        }else if(value=='DOWN-false'){
+            imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}";
+        }else if(value=='DOWN-true'){
+            imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}";
+        }
+        if(imgPath!=''){
+            return '<img src="'+imgPath+'" alt="" width="10" height="13"/>';
+        }
+        
+    }
+       var ds = new Ext.data.Store({
+            proxy: new Ext.data.MemoryProxy(myData),
+            reader: new Ext.data.ArrayReader({}, [
+                {name:'pcTrend'},
+                {name:'sppyTrend'},
+                {name:'kpiName'},
+                {name:'currCmpgn'},
+                {name:'priorCmpgn'},
+                {name:'sppyCmpgn'},
+                {name:'gen1'},
+                {name:'gen2'},
+                {name:'gen3'},
+                {name:'nextCmpgn'}
+            ])
+       });
+       ds.load();
+
+
+       var colModel = new Ext.grid.ColumnModel([
+        {name:'pcTrend',renderer:this.trendRenderer,width:50,header:'{!$Label.Prior_Campaign}',dataIndex:'pcTrend',sortable:true,align:'center',hidden:{!NOT(market.Downline_Perf_PC_Enabled__c)}},
+        {name:'sppyTrend',renderer:this.trendRenderer,width:50,header:'{!$Label.SPPY_Campaign}',dataIndex:'sppyTrend',sortable:true,align:'center',hidden:{!NOT(market.Downline_Perf_SPPY_Enabled__c)}},
+        {name:'kpiName',width:150,header:'{!$Label.Perf_Info}',dataIndex:'kpiName',sortable:true,align:'left'},
+        {name:'currCmpgn',width:75,header:'{!$Label.Current_Campaign}',dataIndex:'currCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_CC_Enabled__c)}},
+        {name:'priorCmpgn',width:75,header:'{!$Label.Prior_Campaign}',dataIndex:'priorCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_PC_Enabled__c)}},
+        {name:'sppyCmpgn',width:75,header:'{!$Label.SPPY_Campaign}',dataIndex:'sppyCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_SPPY_Enabled__c)}},
+        {name:'gen1',width:75,header:'{!$Label.1st_Generation}',dataIndex:'gen1',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_CC_Gen1_Enabled__c)}},
+        {name:'gen2',width:75,header:'{!$Label.2nd_Generation}',dataIndex:'gen2',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_CC_Gen2_Enabled__c)}},
+        {name:'gen3',width:75,header:'{!$Label.3rd_Generation}',dataIndex:'gen3',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_CC_Gen3_Enabled__c)}},
+        {name:'nextCmpgn',width:75,header:'{!$Label.Next_Campaign}',dataIndex:'nextCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Downline_Perf_NC_Enabled__c)}}
+    ]);
+
+
+    Ext.onReady(
+        function() {
+            var grid = new Ext.grid.Grid('alm_data_table', {
+                ds: ds,
+                cm: colModel,
+                enableColumnHide:false,enableDragDrop:false,
+                enableColumnMove:false,autoSizeColumns:true,
+                enableCtxMenu:false,loadMask:true
+            });
+            grid.addListener('render',function(){
+                var loadMsg = document.getElementById('loading_msg');
+                loadMsg.style.height='0px'; 
+                loadMsg.style.visibility='hidden';
+                document.getElementById('grid-panel').style.visibility='visible';
+            });
+    
+                                                            
+            var layout = Ext.BorderLayout.create({  
+                            center: {
+                                titlebar: false,
+                                autoScroll:true,
+                                closeOnTab: true
+                            }
+                        }, 'grid-panel');
+            var dataPanel = new Ext.GridPanel(grid,{fitToFrame:true,title:'{!$Label.Downline_Performance}'});
+            layout.beginUpdate();
+            layout.add('center',dataPanel);
+            layout.add('center',new Ext.ContentPanel('chart-panel',{closable:false,fitToFrame:true,title:'{!$Label.Graph}'}));
+            layout.getRegion('center').showPanel(dataPanel)
+            layout.endUpdate();
+            grid.render();
+        }
+    );
+
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!$CurrentPage.parameters.download='1'}">
+ <table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Name}: <b>{!$User.FirstName} {!$User.FirstName}</b></td>
+    </tr>
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Last_Updated} (dd/MM): <b> 
+	    	<apex:outputText value="{0,date,dd / MM}">
+	    		<apex:param value="{!TODAY()}"/>
+    		</apex:outputText>
+    		</b>
+    	</td>
+    </tr>
+    <tr>
+    <td contenttype="application/vnd.ms-excel"> </td>
+    </tr>
+	</table>
+<table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Perf_Info}</td>
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Current_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_PC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Prior_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_SPPY_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.SPPY_Campaign}</td>
+		</apex:outputPanel>		
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Gen1_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.1st_Generation}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Gen2_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.2nd_Generation}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Gen3_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.3rd_Generation}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_NC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Next_Campaign}</td>
+		</apex:outputPanel>
+    </tr>
+	<apex:repeat value="{!myBusinessRows}" var="row">
+		<tr>
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputText value="{!$Label.Group_Award_Sales}" rendered="{!row.myBusRec.Row_Label__c='Group Award Sales'}"/>
+			<apex:outputText value="{!$Label.Activity}" rendered="{!row.myBusRec.Row_Label__c='Activity'}"/>
+			<apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.myBusRec.Row_Label__c='Net Sales'}"/>
+			<apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!row.myBusRec.Row_Label__c='Orders Under Minimum'}"/>
+			<apex:outputText value="{!$Label.Orders_Achieving_Minimum}" rendered="{!row.myBusRec.Row_Label__c='Orders Achieving Minimum'}"/>
+			<apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!row.myBusRec.Row_Label__c='Orders Not Submitted'}"/>
+			<apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!row.myBusRec.Row_Label__c='Orders on Hold'}"/>
+			<apex:outputText value="{!$Label.Return_net_sales}" rendered="{!row.myBusRec.Row_Label__c='Return Net Sales'}"/>
+			<apex:outputText value="{!$Label.Customers_Served}" rendered="{!row.myBusRec.Row_Label__c='Customers Served'}"/>
+			<apex:outputText value="{!$Label.Past_Due_Amount}" rendered="{!row.myBusRec.Row_Label__c='Past Due Amount'}"/>
+			<apex:outputText value="{!$Label.Appointments}" rendered="{!row.myBusRec.Row_Label__c='Appointments'}"/>
+			<apex:outputText value="{!$Label.Reinstatements}" rendered="{!row.myBusRec.Row_Label__c='Reinstatements'}"/>
+			<apex:outputText value="{!$Label.Removals}" rendered="{!row.myBusRec.Row_Label__c='Removals'}"/>
+			<apex:outputText value="{!$Label.Title_Changes}" rendered="{!row.myBusRec.Row_Label__c='Title Changes'}"/>
+			<apex:outputText value="{!$Label.In_Zone}" rendered="{!row.myBusRec.Row_Label__c='In Zone'}"/>
+			<apex:outputText value="{!$Label.Out_of_Zone}" rendered="{!row.myBusRec.Row_Label__c='Out of Zone'}"/>
+			<apex:outputText value="{!$Label.Total_Downline}" rendered="{!row.myBusRec.Row_Label__c='Total Downline'}"/>
+			<apex:outputText value="{!$Label.Earnings_Paid}" rendered="{!row.myBusRec.Row_Label__c='Earnings Paid'}"/>
+			<apex:outputText value="{!$Label.Potential_Earnings}" rendered="{!row.myBusRec.Row_Label__c='Potential Earnings'}"/>
+			<apex:outputText value="{!$Label.Active_Representatives}" rendered="{!row.myBusRec.Row_Label__c='Active Representatives'}"/>
+			<apex:outputText value="{!$Label.Orders_with_Multiples}" rendered="{!row.myBusRec.Row_Label__c='Orders with Multiples'}"/>
+			<apex:outputText value="{!$Label.Title_Status_Promoted}" rendered="{!row.myBusRec.Row_Label__c='Title / Status Promoted'}"/>
+			<apex:outputText value="{!$Label.Title_Status_Demoted}" rendered="{!row.myBusRec.Row_Label__c='Title / Status Demoted'}"/>
+			<apex:outputText value="{!$Label.Paid_Sales}" rendered="{!row.myBusRec.Row_Label__c='Paid Sales'}"/>
+			<apex:outputText value="{!row.myBusRec.Row_Label__c}" rendered="{!row.myBusRec.Is_Market_Tag__c}"/>
+		</td>
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.myBusRec.CC_Amt__c}"/><apex:outputField value="{!row.myBusRec.CC_Cnt__c}"/><apex:outputField value="{!row.myBusRec.CC_Txt__c}"/>
+
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_PC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.myBusRec.PC_Amt__c}"/><apex:outputField value="{!row.myBusRec.PC_Cnt__c}"/><apex:outputField value="{!row.myBusRec.PC_Txt__c}"/>
+		
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_SPPY_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.myBusRec.SPPY_Amt__c}"/><apex:outputField value="{!row.myBusRec.SPPY_Cnt__c}"/><apex:outputField value="{!row.myBusRec.SPPY_Txt__c}"/>
+		
+		</td>
+		</apex:outputPanel>		
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Gen1_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.myBusRec.CC_1st_Gen_Amt__c}"/><apex:outputField value="{!row.myBusRec.CC_1nd_Gen_Cnt__c}"/><apex:outputField value="{!row.myBusRec.CC_1st_Gen_Txt__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Gen2_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.myBusRec.CC_2nd_Gen_Amt__c}"/><apex:outputField value="{!row.myBusRec.CC_2nd_Gen_Cnt__c}"/><apex:outputField value="{!row.myBusRec.CC_2nd_Gen_Txt__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_CC_Gen3_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.myBusRec.CC_3rd_Gen_Amt__c}"/><apex:outputField value="{!row.myBusRec.CC_3rd_Gen_Cnt__c}"/><apex:outputField value="{!row.myBusRec.CC_3rd_Gen_Txt__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Downline_Perf_NC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.myBusRec.NC_Amt__c}"/><apex:outputField value="{!row.myBusRec.NC_Cnt__c}"/><apex:outputField value="{!row.myBusRec.NC_Txt__c}"/>		
+		</td>
+		</apex:outputPanel>
+		</tr>
+	</apex:repeat>
+</table>
+</apex:outputPanel>
+</apex:component>
+                             	

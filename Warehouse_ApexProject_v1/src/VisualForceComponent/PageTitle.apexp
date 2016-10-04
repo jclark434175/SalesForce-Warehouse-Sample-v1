@@ -1,0 +1,22 @@
+<apex:component >
+<title>
+<apex:outputText value="{!$Label.Pg_Title_My_Business}" rendered="{!$CurrentPage.parameters.pgId='1'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Downline_Perf}" rendered="{!$CurrentPage.parameters.pgId='2'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Downline_Analysis}" rendered="{!$CurrentPage.parameters.pgId='3'}"/>
+<apex:outputText value="{!$Label.Pg_Title_My_Downline}" rendered="{!$CurrentPage.parameters.pgId='4'}"/>
+<apex:outputText value="{!$Label.Opportunity}" rendered="{!$CurrentPage.parameters.pgId='20'}"/>
+
+<apex:outputText value="{!$Label.Pg_Title_Market_Activity}" rendered="{!$CurrentPage.parameters.pgId='8'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Leadership_Activity}" rendered="{!$CurrentPage.parameters.pgId='9'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Market_Analysis}" rendered="{!$CurrentPage.parameters.pgId='10'}"/>
+<apex:outputText value="{!$Label.Pg_Title_My_Market}" rendered="{!$CurrentPage.parameters.pgId='11'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Leadership_Information}" rendered="{!$CurrentPage.parameters.pgId='12'}"/>
+<apex:outputText value="{!$Label.Opportunity}" rendered="{!$CurrentPage.parameters.pgId='21'}"/>
+
+<apex:outputText value="{!$Label.Pg_Title_Campaign_Reports}" rendered="{!$CurrentPage.parameters.pgId='5'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Msgs_From_Avon}" rendered="{!$CurrentPage.parameters.pgId='6'}"/>
+<apex:outputText value="{!$Label.Pg_Title_eTools}" rendered="{!$CurrentPage.parameters.pgId='7'}"/>
+<apex:outputText value="{!$Label.Pg_Title_Reports}" rendered="{!LEN($CurrentPage.parameters.rptId)>0}"/>
+</title>
+</apex:component>
+                             	

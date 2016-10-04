@@ -1,0 +1,395 @@
+<!-- Modified by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+<apex:page showHeader="false" sidebar="false" controller="SalesOrgActivityController" action="{!init}"
+            cache="true" contenttype="{!IF($CurrentPage.parameters.download='1','contentType=application/vnd.ms-excel#AreaZoneActivity.xls','')}">
+    <apex:outputPanel rendered="{!LEN($CurrentPage.parameters.download)=0}">
+    <apex:composition template="LeaderPageTemplate">
+        <apex:define name="content">
+		<script type="text/javascript" src="{!URLFOR($Resource.Ext_JS)}"></script>
+		<script type="text/javascript">
+			Ext.BLANK_IMAGE_URL = '{!URLFOR($Resource.Ext_Resources,'images/s.gif')}';
+		</script>
+		<link href="{!URLFOR($Resource.Ext_Css)}" rel="stylesheet" type="text/css" />
+           <table width="1000" border="0" cellspacing="0" cellpadding="1">
+              <tr>
+                <td colspan="3" height="5"></td>
+              </tr>
+              <tr>
+                <td width="3"></td>
+                <td width="925" align="left" valign="top">
+                    <table width="925" border="0" cellspacing="0" cellpadding="1">
+                      <tr colspan="{!enabledColCount}">
+                        <td>
+                            <!--  Table Heading -->
+                            <table width="932" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                    <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">
+                                        {!$Label.Current_Markets_Performance} :  
+                                        <apex:outputText value="{!currUsr.DFALT_DIV_NM__c}"/>
+                                        <apex:outputPanel rendered="{!LEN(currUsr.DFALT_ZONE_CD__c)>0}">
+                                            - <apex:outputText value="{!currUsr.DFALT_ZONE_CD__c}"/>
+                                        </apex:outputPanel>
+                                    </td>
+                                    <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                                    </td>
+                                </tr>
+                            </table>                        
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="975">
+                            <!--  Table Column Headers -->
+				            <div id="loading_msg" style="visibility:visible">
+								  <table width="100%" border="0" cellpadding="0" cellspacing="1">
+								    <tr align="center" >
+								      <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/processing.gif')}"></td>
+								    </tr>
+								    <tr align="center" >
+								      <td>{!$Label.Processing_Status_Message}</td>
+								    </tr>
+								  </table>
+				            </div>
+                            
+	                      <div id="grid-panel" style="width:925px; height:415px;visibility:hidden">
+	                          <div id="alm_data_table"></div>
+		                      <div id="chart-panel" style="width:600px;">
+			                       <table>
+			                       	<tr>
+			                       		<td>   
+			                          <c:MarketActivityChart salesTitle="{!$Label.Net_Sales}"
+			                                                  repTitle="{!$Label.Total_Representatives}"
+			                                                  ordersTitle="{!$Label.Orders_submitted}"
+			                                                  chartCurrent="{!$Label.Current_Campaign}"
+			                                                  chartPrior="{!$Label.Prior_Campaign}"
+			                                                  ldrLbl="{!$Label.Leadership}"
+			                                                  nonLdrLbl="{!$Label.Non_Leadership}"
+			                                                  salesOrgActivity="{!currRec}"/>
+			                            </td>
+			                         </tr>
+			                      </table>
+		                      </div>
+	                      </div>
+	                </td>
+               </tr>
+            </table>
+         	</td>
+         </tr>
+         </table>   
+<script type="text/javascript">
+	var myData = new Array();
+	var colHeaderMap = {
+		'Award Sales':'{!$Label.Award_Sales}' , 
+		'Net Sales' :'{!$Label.Net_Sales}' , 
+		'Active Representatives':'{!$Label.Active_Representatives}' ,
+		'Activity':'{!$Label.Activity}' ,
+		'Orders not Submitted':'{!$Label.Orders_Not_Submitted}' ,
+		'Orders Submitted':'{!$Label.Orders_submitted}' ,
+		'New Representative 1st Order - In Market':'{!$Label.New_Rep_1st_Order_In_Market}' , 
+		'New Representative 1st Order - Out of Market':'{!$Label.New_Rep_1st_Order_Out_Market}' ,
+		'Paid Sales':'{!$Label.Paid_Sales}' ,
+		'Average Order' :'{!$Label.Average_Order}' , 
+		'Past Due Amount' :'{!$Label.Past_Due_Amount}' , 
+		'Orders on Hold':'{!$Label.Orders_on_Hold}' ,
+		'Appointments':'{!$Label.Appointments}' ,
+		'Reinstatements':'{!$Label.Reinstatements}' ,
+		'Removals':'{!$Label.Removals}' ,
+		'Total Representatives' :'{!$Label.Total_Representatives}' , 
+		'Average Customers Served':'{!$Label.Avg_Customer_Served}' , 
+		'Returns' :'{!$Label.Returns}' , 
+		'Balance Due' :'{!$Label.Balance_Due}' , 
+		'Leadership Earnings' :'{!$Label.Leadership_Earnings}'
+	};
+</script>            
+<apex:repeat value="{!activityRows}" var="row">
+<script type="text/javascript">
+	var rowData = new Array();
+	var kpiName = '';
+	var isMarketTag = {!row.dataRec.Is_Market_Tag__c};
+	var rowType = '{!row.dataRec.Row_Label__c}';
+	kpiName = colHeaderMap[rowType];
+	if(!kpiName || kpiName.length==0 ||isMarketTag){
+		kpiName='{!row.dataRec.Row_Label__c}';
+	}
+	rowData.push('{!row.PlanUpDownInd}-{!row.reverseTrend}');
+	rowData.push('{!row.PCUpDownInd}-{!row.reverseTrend}');
+	rowData.push(kpiName);
+	var fldVal = '<apex:outputField value="{!row.dataRec.Plan_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.Plan_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.Plan_TXT__c}"/>';
+	if(rowType=='Activity' && fldVal!=''){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.CC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.CC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.CC_TXT__c}"/>';
+	if(rowType=='Activity' && fldVal!=''){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.PC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.PC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.PC_TXT__c}"/>';
+	if(rowType=='Activity' && fldVal!=''){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.SPPY_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.SPPY_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.SPPY_TXT__c}"/>';
+	if(rowType=='Activity' && fldVal!=''){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+
+	if(rowType!='Activity'){
+		rowData.push('<apex:outputField value="{!row.dataRec.Ldr_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.Ldr_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.Ldr_TXT__c}"/>');
+	}else{
+		rowData.push('');
+	}
+	if(rowType!='Activity'){
+		rowData.push('<apex:outputField value="{!row.dataRec.LdtTitle1_AMT__c}"/>');
+	}else{
+		rowData.push('<apex:outputField value="{!row.dataRec.Ldr_CNT__c}"/> %');
+	}
+	if(rowType!='Activity'){
+		rowData.push('<apex:outputField value="{!row.dataRec.NonLdr_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.NonLdr_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.NonLdr_TXT__c}"/>');
+	}else{
+		rowData.push('');
+	}
+	if(rowType!='Activity'){
+		rowData.push('<apex:outputField value="{!row.dataRec.LdtTitle2_AMT__c}"/>');
+	}else{
+		rowData.push('<apex:outputField value="{!row.dataRec.NonLdr_CNT__c}"/> %');
+	}
+
+	var fldVal = '<apex:outputField value="{!row.dataRec.NC_AMT__c}"/>'+'<apex:outputField value="{!row.dataRec.NC_CNT__c}"/>'+'<apex:outputField value="{!row.dataRec.NC_TXT__c}"/>';
+	if(rowType=='Activity' && fldVal!=''){
+		fldVal+='%';
+	}
+	rowData.push(fldVal);
+	myData.push(rowData);
+</script>
+</apex:repeat>
+<script type="text/javascript">
+/*
+ * Ext JS Library 1.1.1
+ * Copyright(c) 2006-2007, Ext JS, LLC.
+ * licensing@extjs.com
+ * 
+ * http://www.extjs.com/license
+ */
+
+		function trendRenderer(value,metaData,record,rowIndex,colIndex,dataStore){
+			var imgPath ='';
+			if(value=='UP-false'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}";
+			}else if(value=='UP-true'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}";
+			}else if(value=='DOWN-false'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_down.gif')}";
+			}else if(value=='DOWN-true'){
+				imgPath="{!URLFOR($Resource.AvonSiteAssets,'images/arrow_up.gif')}";
+			}
+			if(imgPath!=''){
+				return '<img src="'+imgPath+'" alt="" width="10" height="13"/>';
+			}
+			
+		}
+       var ds = new Ext.data.Store({
+	        proxy: new Ext.data.MemoryProxy(myData),
+	        reader: new Ext.data.ArrayReader({}, [
+				{name:'planTrend'},
+				{name:'pcTrend'},
+				{name:'kpiName'},
+				{name:'plan'},
+				{name:'currCmpgn'},
+				{name:'priorCmpgn'},
+				{name:'sppyCmpgn'},
+				{name:'ldr'},
+				{name:'ldrPct'},
+				{name:'nonLdr'},
+				{name:'nonLdrPct'},
+				{name:'nextCmpgn'}
+			])
+       });
+       ds.load();
+
+
+       var colModel = new Ext.grid.ColumnModel([
+			{name:'planTrend',renderer:this.trendRenderer,width:50,header:'{!$Label.Plan}',dataIndex:'planTrend',sortable:true,align:'center',hidden:{!NOT(market.Mkt_Actvty_Plan_Enabled__c)}},
+			{name:'pcTrend',renderer:this.trendRenderer,width:50,header:'{!$Label.Prior_Campaign}',dataIndex:'pcTrend',sortable:true,align:'center',hidden:{!NOT(market.Mkt_Actvty_PC_Enabled__c)}},
+			{name:'kpiName',width:150,header:'{!$Label.Perf_Info}',dataIndex:'kpiName',sortable:true,align:'left'},
+			{name:'plan',width:75,header:'{!$Label.Plan}',dataIndex:'plan',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_Plan_Enabled__c)}},
+			{name:'currCmpgn',width:75,header:'{!$Label.Current_Campaign}',dataIndex:'currCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_CC_Enabled__c)}},
+			{name:'priorCmpgn',width:75,header:'{!$Label.Prior_Campaign}',dataIndex:'priorCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_PC_Enabled__c)}},
+			{name:'sppyCmpgn',width:75,header:'{!$Label.SPPY_Campaign}',dataIndex:'sppyCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_SPPY_Enabled__c)}},
+			{name:'ldr',width:75,header:'{!$Label.Leadership}',dataIndex:'ldr',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_Ldr_Enabled__c)}},
+			{name:'ldrPct',width:75,header:'%',dataIndex:'ldrPct',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_Ldr_Enabled__c)}},
+			{name:'nonLdr',width:75,header:'{!$Label.Non_Leadership}',dataIndex:'nonLdr',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_Non_Ldr_Enabled__c)}},
+			{name:'nonLdrPct',width:75,header:'%',dataIndex:'nonLdrPct',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_Non_Ldr_Enabled__c)}},
+			{name:'nextCmpgn',width:75,header:'{!$Label.Next_Campaign}',dataIndex:'nextCmpgn',sortable:false,align:'center',hidden:{!NOT(market.Mkt_Actvty_NC_Enabled__c)}}
+		]);
+
+	Ext.onReady(
+		function() {
+	        var grid = new Ext.grid.Grid('alm_data_table', {
+	            ds: ds,
+	            cm: colModel,
+	            enableColumnHide:false,enableDragDrop:false,
+	        	enableColumnMove:false,autoSizeColumns:true,
+	        	enableCtxMenu:false,loadMask:true
+	        });
+	        grid.addListener('render',function(){
+	        	var loadMsg = document.getElementById('loading_msg');
+	        	loadMsg.style.height='0px'; 
+	        	loadMsg.style.visibility='hidden';
+		        document.getElementById('grid-panel').style.visibility='visible';
+	        });
+	
+        													
+			var layout = Ext.BorderLayout.create({	
+		                    center: {
+		                    	titlebar: false,
+		                        autoScroll:true,
+	                            closeOnTab: true
+		                    }
+						}, 'grid-panel');
+			var dataPanel = new Ext.GridPanel(grid,{fitToFrame:true,title:'{!$Label.Current_Markets_Performance}'});
+			layout.beginUpdate();
+			layout.add('center',dataPanel);
+			layout.add('center',new Ext.ContentPanel('chart-panel',{closable:false,fitToFrame:false,title:'{!$Label.Graph}'}));
+			layout.getRegion('center').showPanel(dataPanel)
+			layout.endUpdate();
+	        grid.render();
+		}
+	);
+
+					
+</script>
+    </apex:define>
+    </apex:composition>
+    </apex:outputPanel>
+    <!-- Added by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+    <apex:outputPanel rendered="{!$CurrentPage.parameters.download='1'}">
+        <table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Name}: <b>{!$User.FirstName} {!$User.FirstName}</b></td>
+    </tr>
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Last_Updated} (dd/MM): <b> 
+	    	<apex:outputText value="{0,date,dd / MM}">
+	    		<apex:param value="{!TODAY()}"/>
+    		</apex:outputText>
+    		</b>
+    	</td>
+    </tr>
+    <tr>
+    <td contenttype="application/vnd.ms-excel"> </td>
+    </tr>
+	</table>
+    <table border="0">
+    <tr>
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Perf_Info}</td>
+    	<apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+    	<td contenttype="application/vnd.ms-excel">{!$Label.Plan}</td>
+    	</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_CC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Current_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_PC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Prior_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_SPPY_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.SPPY_Campaign}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Leadership}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">%</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Non_Leadership}</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">%</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_NC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">{!$Label.Next_Campaign}</td>
+		</apex:outputPanel>
+    </tr>
+    <apex:repeat value="{!activityRows}" var="row">
+    	<tr>
+    	<td contenttype="application/vnd.ms-excel">
+			<apex:outputText value="{!$Label.Award_Sales}" rendered="{!row.dataRec.Row_Label__c='Award Sales'}"/>
+			<apex:outputText value="{!$Label.Net_Sales}" rendered="{!row.dataRec.Row_Label__c='Net Sales'}"/>
+			<apex:outputText value="{!$Label.Active_Representatives}" rendered="{!row.dataRec.Row_Label__c='Active Representatives'}"/>
+			<apex:outputText value="{!$Label.Activity}" rendered="{!row.dataRec.Row_Label__c='Activity' }"/>
+			<apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!row.dataRec.Row_Label__c='Orders not Submitted'}"/>
+			<apex:outputText value="{!$Label.Orders_submitted}" rendered="{!row.dataRec.Row_Label__c='Orders Submitted' }"/>
+			<apex:outputText value="{!$Label.New_Rep_1st_Order_In_Market}" rendered="{!row.dataRec.Row_Label__c='New Representative 1st Order - In Market'}"/>
+			<apex:outputText value="{!$Label.New_Rep_1st_Order_Out_Market}" rendered="{!row.dataRec.Row_Label__c='New Representative 1st Order - Out of Market' }"/>
+			<apex:outputText value="{!$Label.Paid_Sales}" rendered="{!row.dataRec.Row_Label__c='Paid Sales' }"/>
+			<apex:outputText value="{!$Label.Average_Order}" rendered="{!row.dataRec.Row_Label__c='Average Order' }"/>
+			<apex:outputText value="{!$Label.Past_Due_Amount}" rendered="{!row.dataRec.Row_Label__c='Past Due Amount'}"/>
+			<apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!row.dataRec.Row_Label__c='Orders on Hold'}"/>
+			<apex:outputText value="{!$Label.Appointments}" rendered="{!row.dataRec.Row_Label__c='Appointments' }"/>
+			<apex:outputText value="{!$Label.Reinstatements}" rendered="{!row.dataRec.Row_Label__c='Reinstatements'}"/>
+			<apex:outputText value="{!$Label.Removals}" rendered="{!row.dataRec.Row_Label__c='Removals' }"/>
+			<apex:outputText value="{!$Label.Total_Representatives}" rendered="{!row.dataRec.Row_Label__c='Total Representatives' }"/>
+			<apex:outputText value="{!$Label.Avg_Customer_Served}" rendered="{!row.dataRec.Row_Label__c='Average Customers Served' }"/>
+			<apex:outputText value="{!$Label.Returns}" rendered="{!row.dataRec.Row_Label__c='Returns' }"/>
+			<apex:outputText value="{!$Label.Balance_Due}" rendered="{!row.dataRec.Row_Label__c='Balance Due' }"/>
+			<apex:outputText value="{!$Label.Leadership_Earnings}" rendered="{!row.dataRec.Row_Label__c='Leadership Earnings' }"/>
+			<apex:outputText value="{!row.dataRec.Row_Label__c}" rendered="{!row.dataRec.Is_Market_Tag__c}"/>
+			
+		</td>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Plan_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.Plan_AMT__c}"/><apex:outputField value="{!row.dataRec.Plan_CNT__c}"/><apex:outputField value="{!row.dataRec.Plan_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_CC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.CC_AMT__c}"/><apex:outputField value="{!row.dataRec.CC_CNT__c}"/><apex:outputField value="{!row.dataRec.CC_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_PC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.PC_AMT__c}"/><apex:outputField value="{!row.dataRec.PC_CNT__c}"/><apex:outputField value="{!row.dataRec.PC_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_SPPY_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.SPPY_AMT__c}"/><apex:outputField value="{!row.dataRec.SPPY_CNT__c}"/><apex:outputField value="{!row.dataRec.SPPY_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.Ldr_AMT__c}"/><apex:outputField value="{!row.dataRec.Ldr_CNT__c}"/><apex:outputField value="{!row.dataRec.Ldr_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.dataRec.LdtTitle1_AMT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.NonLdr_AMT__c}"/><apex:outputField value="{!row.dataRec.NonLdr_CNT__c}"/><apex:outputField value="{!row.dataRec.NonLdr_TXT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_Non_Ldr_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+			<apex:outputField value="{!row.dataRec.LdtTitle2_AMT__c}"/>
+		</td>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!market.Mkt_Actvty_NC_Enabled__c}">
+		<td contenttype="application/vnd.ms-excel">
+		<apex:outputField value="{!row.dataRec.NC_AMT__c}"/><apex:outputField value="{!row.dataRec.NC_CNT__c}"/><apex:outputField value="{!row.dataRec.NC_TXT__c}"/>
+
+		</td>
+		</apex:outputPanel>
+		</tr>
+	</apex:repeat>
+	</table>
+   </apex:outputPanel>
+   <!-- End of added code:  by Snehashis Ghosh on 11/13/2009 ; Code added to build up Download page functionality. -->
+</apex:page>
+                            	

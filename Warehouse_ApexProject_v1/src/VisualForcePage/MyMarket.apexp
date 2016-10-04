@@ -1,0 +1,310 @@
+<apex:page showHeader="false" sidebar="false" controller="MyMarketController" action="{!init}">
+    <apex:composition template="LeaderPageTemplate">
+            <apex:define name="content">
+                
+    <script type="text/javascript">
+
+        String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
+        String.prototype.startsWith = function(str) {return (this.match("^"+str)==str)}
+        function addOption(txtVal,titlLvl){
+            if(titlLvl !='UQ'){
+                var geneFilter = document.getElementById('{!$Component.theForm.geneFilter1}');
+                var insertAt = geneFilter.options[geneFilter.options.length];
+                var newOption=document.createElement('option');
+                newOption.text = txtVal;
+                var optVal = 'Title Level '+titlLvl;
+                if('{!srchCrit.Zone_Gene_Filter_1__c}'==optVal){
+                    newOption.selected=true;
+                }
+                newOption.value=optVal;
+                try{
+                    geneFilter.add(newOption,insertAt);
+                }catch(ex){
+                    geneFilter.add(newOption);
+                }
+            }       
+        }
+        function setDrillDownAcct(acctNbr){
+            var drlDwnAcct = document.getElementById('{!$Component.theForm.drillAcct}');
+            drlDwnAcct.value = acctNbr;
+        }
+        function selectAll(){
+            setCBValues(true);
+        }
+        function clearAll(){
+            setCBValues(false);
+        }
+        function setCBValues(checkUnCheck){
+            var allCB = document.getElementsByTagName('input');
+            var currCB;
+            for(var idx=0;idx<allCB.length;idx++){
+                currCB = allCB[idx];
+                if(currCB.id.endsWith('repSelCBox')){
+                    currCB.checked = checkUnCheck;
+                }
+            }
+        }
+        function setZone(){
+            var zoneFld = document.getElementById('{!$Component.theForm.zoneSelCd}');
+            var znSel = document.getElementById('zoneSelect');
+            var selVal = znSel.options[znSel.selectedIndex];
+            zoneFld.value = selVal.value;
+        }
+        function showHideMessage(msgState){
+        	var processMsg = document.getElementById('processing_msg');
+			processMsg.style.height=screen.height+'px';
+			processMsg.style.width=screen.width+'px';
+        	processMsg.style.visibility=msgState;
+       	}
+        
+        
+    </script>
+        <apex:form id="theForm">
+		<div id="processing_msg" style="position:absolute;left:0px;top:0px;z-index:4;background-color:#FFFFFF;opacity:.90;filter:Alpha(opacity=90);">
+			<div id="inner_msg_table" style="position:relative;vertical-align:middle;top:30%">
+			  <table width="100%" border="0" cellpadding="0" cellspacing="1">
+			    <tr align="center" >
+			      <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/processing.gif')}"></td>
+			    </tr>
+			    <tr align="center" >
+			      <td>{!$Label.Processing_Status_Message}</td>
+			    </tr>
+			  </table>
+			</div>
+		</div>
+	    <script type="text/javascript">
+	    	showHideMessage('hidden');
+	    </script>
+        
+        <apex:inputHidden id="drillAcct" value="{!drillDownAcctNbr}"/>
+        <apex:inputHidden id="zoneSelCd" value="{!zoneFilter}"/>
+         <table border=0 cellpadding=0 cellspacing=5>
+            <tr align="right">
+                <td><apex:commandLink value="{!$Label.Previous}" onClick="showHideMessage('visible');" action="{!previous}" rendered="{!startRow>100}"/></td>
+                <td>
+                	<apex:outputPanel rendered="{!totalDownlines>0}">
+                	( {!$Label.Displaying} <apex:outputText value="{!((pageNbr-1)*100)+1}"/> - <apex:outputText value="{!((pageNbr-1)*100)+totalDownlines}"/> )
+                	</apex:outputPanel>
+                </td>
+                <td><apex:commandLink value="{!$Label.Next}" onClick="showHideMessage('visible');" action="{!next}" rendered="{!totalDownlines=100}"/> </td>
+                
+                <td width=700 align="right" valign="top">
+                    <table border=0 cellpadding=0 cellspacing=2>
+                        <td>
+                            <apex:image width="30" height="20" value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_red_none.gif')}"></apex:image>
+                        </td>
+                        <td class="gene_details" valign="center">{!$Label.No_Personal_Order}</td>
+                        <td width="10"></td>
+                        <td>
+                            <apex:image width="30" height="20" value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_amber_none.gif')}"></apex:image>
+                        </td>
+                        <td class="gene_details" valign="center">{!$Label.Personal_Qualifier_Not_Achieved}</td>
+                        <td width="10"></td>
+                        <td>
+                            <apex:image width="30" height="20" value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_green_none.gif')}"></apex:image>
+                        </td>
+                        <td class="gene_details" valign="center">{!$Label.Personal_Qualifier_Achieved}</td>
+                        <td width="10"></td>
+                        
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td width=940 colspan="4">
+                    <table border=0 cellpadding=0 cellspacing=2 >
+                        <tr>
+                            <td>
+                                <table border=0 cellpadding=0 cellspacing=2>
+                                    <tr>
+                                        <td width="60%">
+                                            <a href="javascript:selectAll()" class="actions">{!$Label.Select_All}</a> | <a href="javascript:clearAll()" class="actions">{!$Label.Clear_All}</a>
+                                        </td>
+                                        <td width="10"></td>
+                                        <apex:outputPanel rendered="{!userProfile='Avon Division Manager'}">
+                                        <td>
+                                            <select id="zoneSelect" onChange="setZone()">
+                                              <option value="All">-All-</option>
+                                                <apex:repeat value="{!zoneList}" var="zoneCd">
+                                                  <apex:outputPanel rendered="{!zoneFilter = zoneCd}">
+                                                      <option value="{!zoneCd}" selected>{!zoneCd}</option>
+                                                  </apex:outputPanel>
+                                                  <apex:outputPanel rendered="{!zoneFilter != zoneCd}">
+                                                      <option value="{!zoneCd}">{!zoneCd}</option>
+                                                  </apex:outputPanel>
+                                                </apex:repeat>
+                                            </select>
+                                        </td>
+                                        </apex:outputPanel>
+                                        <td>
+                                            <apex:inputField id="geneFilter1" value="{!srchCrit.Zone_Gene_Filter_1__c}"/>
+                                        </td>
+                                        <td>
+                                            <apex:inputField id="geneFilter2" value="{!srchCrit.Ldr_Gene_Filter_2__c}"/>
+                                        </td>
+                                        <td>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                              <tr>
+                                                <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                                <td nowrap="nowrap" background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                    <apex:commandLink onClick="showHideMessage('visible');" value="{!$Label.Go}" action="{!filterRecords}"/>
+                                                </td>
+                                                <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                              </tr>
+                                            </table>
+                        
+                                        </td>
+                                        <td>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                              <tr>
+                                                <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                                <td nowrap="nowrap" background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                    <apex:commandLink value="{!$Label.Email_Selected}" action="{!emailSelected}"/>
+                                                </td>
+                                                <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                              </tr>
+                                            </table>
+                        
+                                        </td>
+                                        <td>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                              <tr>
+                                                <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                                <td nowrap="nowrap" background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                    <apex:commandLink value="{!$Label.Print_Selected}" action="{!printSelected}"/>
+                                                </td>
+                                                <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                              </tr>
+                                            </table>
+                        
+                                        </td>
+                                        
+                                    </tr>                                     
+                                </table>
+                            </td>
+                        </tr>
+                     </table>           
+                </td>
+            </tr>
+            <tr>
+                <td width=940 colspan="4">
+                    <div class="table_with_scrolls" style="height:450px;width:940px">
+                    <table border=0 cellpadding=0 cellspacing=2>
+                        <apex:repeat value="{!downlineGroups}" var="group">
+                            <tr >
+                                <apex:repeat value="{!group.downlines}" var="downlineRep">
+                                    <td class="grid" valign="top">
+                                        <table border="0">
+                                          <tr>
+                                            <td valign="top"><apex:inputCheckbox id="repSelCBox" value="{!downlineRep.selected}" style="margin-top:0px"/></td>
+                                            <td>
+                                                <table width="135" border="0" cellpadding="1" cellspacing="0" class="gridText">
+                                                      <tr>
+                                                        <td class="gene_details"><a href="/apex/RepDetail?pgId=100&acctNbr={!downlineRep.genealogy.MRKT_ACCT_KEY__c}&retPgId=11" class="actions">{!downlineRep.genealogy.Representative__r.FirstName}
+{!downlineRep.genealogy.Representative__r.LastName}</a></td>
+                                                      </tr>
+                                                      <tr>
+                                                          <td class="gene_details">{!$Label.Title}: 
+                                                            <apex:outputText value="{!downlineRep.ldrTitle}" rendered="{!LEN(downlineRep.ldrTitle)>0}"/>
+                                                            <apex:outputText value="{!$Label.Non_Leader}" rendered="{!OR(downlineRep.ldrTitle=null,downlineRep.ldrTitle='')}"/>
+                                                          </td>
+                                                      </tr>
+                                                      <tr>
+                                                        <td class="gene_details">{!$Label.Seller_Status}: {!downlineRep.sellerSts}</td>
+                                                      </tr>
+                                                      <tr>
+                                                        <td class="gene_details">{!$Label.Home_Phone}: {!downlineRep.genealogy.Representative__r.Phone}</td>
+                                                      </tr>
+                                                      <tr>
+                                                        <td class="gene_details">{!$Label.Personal_Sales} : <apex:outputField value="{!downlineRep.genealogy.Personal_Sales__r.AWRD_SLS_AMT__c}"
+                                                                                                        rendered="{!downlineRep.genealogy.Personal_Sales__c !=null}"/></td>
+                                                      </tr>
+                                                      <tr>
+                                                        <!-- <td class="gene_details">{!$Label.Group_Sales} : <apex:outputField value="{!downlineRep.genealogy.Group_Sales__r.GENRTN_1_GRP_AWRD_SLS_AMT__c}"
+                                                                                                      rendered="{!downlineRep.genealogy.Group_Sales__c !=null}"/></td>-->
+                                                           <!-- Zishan Change 08/03/09 -->                                           
+                                                           <td class="gene_details">{!$Label.Group_Sales} : <apex:outputField value="{!downlineRep.genealogy.MLdr_GRP_AWRD_SLS_AMT__c}"
+                                                                                                      rendered="{!downlineRep.genealogy.Group_Sales__c !=null}"/></td>                                                                                                      
+                                                      </tr>
+                                                      <tr>
+                                                        <td class="gene_details">{!$Label.Active_Downline} : <apex:outputField value="{!downlineRep.genealogy.Group_Sales__r.CC_TOTAL_ORD_RCVD__c}"/></td>
+                                                      </tr>
+                                                      <apex:outputPanel rendered="{!downlineRep.genealogy.UPLN_GENRTN_1_ACCT_NR__c!=null}">
+                                                      <tr>
+                                                        <td class="gene_details">{!$Label.Upline} : <a href="/apex/RepDetail?pgId=100&retPgId=4&acctNbr={!downlineRep.genealogy.MRKT_ID__c}{!downlineRep.genealogy.UPLN_GENRTN_1_ACCT_NR__c}"><apex:outputField value="{!downlineRep.genealogy.UPLN_GENRTN_1_FULL_NM__c}"/></td>
+                                                      </tr>
+                                                      </apex:outputPanel>
+                                                </table>
+                                
+                                            </td>
+                                            <td valign="top" width="50">
+                                                <a href="/apex/MyMarketDrilldown?pgId=11&repAcctNbr={!downlineRep.genealogy.Representative__r.ACCT_NR__c}">
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_red_none.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=1,downlineRep.downlinesFlag=0)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_amber_none.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=2,downlineRep.downlinesFlag=0)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_green_none.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=3,downlineRep.downlinesFlag=0)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_red_I.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=1,downlineRep.downlinesFlag=1)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_amber_I.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=2,downlineRep.downlinesFlag=1)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_green_I.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=3,downlineRep.downlinesFlag=1)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_red_II.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=1,downlineRep.downlinesFlag=2)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_amber_II.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=2,downlineRep.downlinesFlag=2)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_green_II.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=3,downlineRep.downlinesFlag=2)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_red_III.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=1,downlineRep.downlinesFlag=3)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_amber_III.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=2,downlineRep.downlinesFlag=3)}"></apex:image>
+                                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/leader_green_III.gif')}" 
+                                                                rendered="{!AND(downlineRep.achievementFlag=3,downlineRep.downlinesFlag=3)}"></apex:image>
+                                                </a>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                    </td>
+                
+                                </apex:repeat>
+                            </tr>
+                        </apex:repeat>
+                    </tr>
+                        
+                    </table>
+                    </div>
+                
+                </td>
+            </tr>
+         </table>
+    <apex:repeat value="{!leaderTitles}" var="ldrTitle">
+        <script type="text/javascript">
+            addOption('{!ldrTitle.LCL_LDRSHP_TITL_LANG_DESC_TXT__c}','{!ldrTitle.LDRSHP_TITL_LVL_NR__c}');
+        </script>
+    </apex:repeat>
+     <script type="text/javascript">
+        var geneFilter = document.getElementById('{!$Component.theForm.geneFilter1}');
+        geneFilter.remove(0);
+        var firstOpt = geneFilter.options[0];
+        if(firstOpt.text.startsWith('Title Level')){
+            geneFilter.remove(0);
+        }
+        
+        geneFilter = document.getElementById('{!$Component.theForm.geneFilter2}');
+        geneFilter.remove(0);
+     </script>
+
+    <apex:outputPanel rendered="{!printSelected}">
+     <script type="text/javascript">
+        var repPrintUrl= '/apex/RepDetail?pgId=100&acctNbr={!printAcctNbrs}&print=1';
+        window.open(repPrintUrl,'printDetail','width=920,height=500');
+     </script>
+    </apex:outputPanel>      
+        </apex:form>
+                
+            </apex:define>
+    </apex:composition>
+</apex:page>
+                            	

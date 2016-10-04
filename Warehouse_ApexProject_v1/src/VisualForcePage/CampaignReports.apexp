@@ -1,0 +1,8 @@
+<apex:page showHeader="false" sidebar="false" controller="CampaignReportsController" action="{!init}">
+	<apex:composition template="LeaderPageTemplate">
+			<apex:define name="content">
+				<c:ASLFReports repAcctNbr="{!currUsr.ACCT_NR__c}"/>
+			</apex:define>
+	</apex:composition>
+</apex:page>
+                            	

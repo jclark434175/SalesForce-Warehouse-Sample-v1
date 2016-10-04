@@ -1,0 +1,844 @@
+<apex:page controller="DrilldownController" action="{!init}" showHeader="false">
+    <apex:composition template="LeaderPageTemplate">
+            <apex:define name="content">
+    <apex:outputPanel id="theGridData">
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['table']});
+    </script>
+                <script type="text/javascript" src="{!URLFOR($Resource.wz_tooltip_js)}"></script>
+                <script type="text/javascript">
+                    String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
+                    function showRepInfo(repName,terrInd,acctNbr,slsZone,phoneNbr,emailId,title,
+                                         genNbr,sellSts,avonLOA,ldrLOA,bDay,uplineNm,uplnAcctNbr,uplnPhn){
+                        var rowCnt=0;
+                        var repInfoHtml = '<table border="0" cellspacing="1" cellpadding="0">';
+                        var usrProfile = '{!userProfile}';
+                        repInfoHtml +=getRowHtml('{!$Label.Name}',repName,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Account_Nbr}',acctNbr,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Zone}',slsZone,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Home_Phone}',phoneNbr,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.eMail}',emailId,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Title}',title,(++rowCnt));
+                        if(usrProfile=='Avon Leader'){
+                            repInfoHtml +=getRowHtml('{!$Label.Generation}',genNbr,(++rowCnt));
+                        }
+                        repInfoHtml +=getRowHtml('{!$Label.Seller_Status}',sellSts,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Avon_Length_of_Association}',avonLOA,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Length_of_Association_in_Leadership}',ldrLOA,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Birthdate}',bDay,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Territory_Code}',terrInd,(++rowCnt));
+                        repInfoHtml +='<tr class="information_header"><td colspan="2" nowrap="nowrap" align="center" bgcolor="#f8dfdf"><b>{!$Label.Upline}</b></td></tr>';
+                        repInfoHtml +=getRowHtml('{!$Label.Upline}',uplineNm,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Account_Nbr}',uplnAcctNbr,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Home_Phone}',uplnPhn,(++rowCnt));
+                        repInfoHtml+= '</table>';
+                        Tip(    repInfoHtml,CLOSEBTN,true,CLICKSTICKY,true,OFFSETX,20,
+                                TITLE,'{!$Label.Representative}',TITLEFONTCOLOR,'black',TITLEBGCOLOR,'#FCF4F4',
+                                BGCOLOR,'#ffffff',BORDERSTYLE,'solid',SHADOW,true,
+                                HEIGHT,150,WIDTH,375
+                                );
+                    }                    
+                    function getRowHtml(labelStr,data,rowNbr){
+                        var rowClass = (rowNbr%2 ==0)?'display_row_even':'display_row_odd';
+                        var tempHtml = '<tr class="'+rowClass+'"><td nowrap="nowrap" width="125" class="data_cell" align="left">'+labelStr+'</td>';
+                        tempHtml +='<td nowrap="nowrap" width="100" class="data_cell">'+data+'</td></tr>';
+                        return tempHtml;
+                    }
+
+                    function setSortColumn(colName){
+                        var usrSortFld = document.getElementById('{!$Component.theForm.usrSort}');
+                        usrSortFld.value=colName;
+                        showHideMessage('visible');
+                    }
+                    
+                    function setMailPlan(){
+                        var usrMplanFld = document.getElementById('{!$Component.theForm.usrMplan}');
+                        var mplanSel = document.getElementById('mailPlansSelect');
+                        var selVal = mplanSel.options[mplanSel.selectedIndex];
+                        usrMplanFld.value = selVal.value;
+                    }
+                    function setTitle(){
+                        var usrTitlFld = document.getElementById('{!$Component.theForm.usrTitl}');
+                        var titlSel = document.getElementById('ldrTitles');
+                        var selVal = titlSel.options[titlSel.selectedIndex];
+                        usrTitlFld.value = selVal.value;
+                    }
+                    function selectAll(){
+                        setCBValues(true);
+                    }
+                    function clearAll(){
+                        setCBValues(false);
+                    }
+                    function setCBValues(checkUnCheck){
+                        var allCB = document.getElementsByTagName('input');
+                        var currCB;
+                        for(var idx=0;idx<allCB.length;idx++){
+                            currCB = allCB[idx];
+                            if(currCB.id.endsWith('repSelCBox') || currCB.id.endsWith('repSelCBox1')){
+                                currCB.checked = checkUnCheck;
+                            }
+                        }
+                    }
+                    function setZone(){
+                        var zoneFld = document.getElementById('{!$Component.theForm.zoneFilter}');
+                        var znSel = document.getElementById('zoneSelect');
+                        var selVal = znSel.options[znSel.selectedIndex];
+                        zoneFld.value = selVal.value;
+                    }
+                    function showHideMessage(msgState){
+                        var processMsg = document.getElementById('processing_msg');
+                        processMsg.style.height=screen.height+'px';
+                        processMsg.style.width=screen.width+'px';
+                        processMsg.style.visibility=msgState;
+                        
+                    }
+    </script>                    
+    
+    <style type="text/css">
+        .google-visualization-table-tr-odd {
+            font-family:arial;
+            font-size:11px;
+            font-weight:normal;
+            background-color: #FFFFFF;
+            text-indent: 3px;
+            border: thin solid #dad9d9;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .google-visualization-table-tr-over {
+            font-family:arial;
+            font-size:11px;
+            font-weight:normal;
+            background-color: #e7e4e4;
+            text-indent: 3px;
+            border: thin solid #dad9d9;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .google-visualization-table-tr-even {
+            font-family:arial;
+            font-size:11px;
+            font-weight:normal;
+            background-color: #e7e4e4;
+            text-indent: 3px;
+            border: thin solid #dad9d9;
+            text-align: center;
+            line-height: 20px;
+        }
+        
+        .google-visualization-table-tr-sel{
+            font-family:arial;
+            font-size:11px;
+            font-weight:normal;
+            background-color: #f8dfdf;
+            text-indent: 3px;
+            border: thin solid #dad9d9;
+            text-align: center;
+            line-height: 20px;
+        }
+            
+    </style>
+    <script type="text/javascript">
+    	var colOrderMap = new Array();
+        var data = new google.visualization.DataTable();
+        data.addColumn('string','{!$Label.Name}','rep_name');
+        data.addColumn('string','{!$Label.Account_Nbr}','rep_acct');
+        data.addColumn('string','{!$Label.Zone}','rep_zone');
+        data.addColumn('string','{!$Label.Home_Phone}','rep_phone');
+        data.addColumn('string','{!$Label.eMail}','rep_email');
+        data.addColumn('string','{!$Label.Title}','rep_title');
+        data.addColumn('string','{!$Label.Generation}','rep_gen_nbr');
+        data.addColumn('string','{!$Label.Seller_Status}','rep_seller_sts');
+        data.addColumn('string','{!$Label.Avon_Length_of_Association}','rep_loa');
+        data.addColumn('string','{!$Label.Length_of_Association_in_Leadership}','rep_ldr_loa');
+        data.addColumn('string','{!$Label.Birthdate}','rep_bday');
+        data.addColumn('string','{!$Label.Territory_Code}','rep_terr_ind');
+        data.addColumn('string','{!$Label.Upline}','rep_upline_name');
+        data.addColumn('string','{!$Label.Account_Nbr}','rep_upline_acct');
+        data.addColumn('string','{!$Label.Home_Phone}','rep_upline_phone');
+    	var colCount=15;
+        var myData = new Array();
+    </script>
+<apex:outputPanel rendered="{!IsMIN_TO_EARN_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Needed_for_Minimum}','ord_min_reqt_amt');
+colOrderMap['Personal_sales__r.MIN_PRSNL_SLS_REQD_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsBirthdayEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Birthday}','rep_birthday');
+colOrderMap['Representative__r.Birthday__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_APPT_DTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Anniversary}','rep_REP_APPT_DT');
+colOrderMap['Representative__r.REP_APPT_DT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsRTURN_AWRD_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Return_Award_Sales}','ord_RTURN_AWRD_SLS_AMT');
+colOrderMap['Personal_Sales__r.RTURN_AWRD_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsRTURN_NET_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Return_net_sales}','ord_RTURN_NET_SLS_AMT');
+colOrderMap['Personal_Sales__r.RTURN_NET_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPercent_of_YTD_Net_SalesEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Pct_of_Year_to_Date_Net_Sales}','ord_Percent_of_YTD_Net_Sales');
+colOrderMap['Personal_Sales__r.Percent_of_YTD_Net_Sales__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPercent_of_Current_Net_SalesEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Pct_of_Current_Net_Sales}','ord_Percent_of_Current_Net_Sales');
+colOrderMap['Personal_Sales__r.Percent_of_Current_Net_Sales__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsORD_SRCE_DESC_TXTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Order_Placement_Method}','ord_ORD_SRCE_DESC_TXT');
+colOrderMap['Personal_Sales__r.ORD_SRCE_DESC_TXT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsOPERTNL_CMPGN_NREnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Nbr_of_Campaigns}','ord_OPERTNL_CMPGN_NR');
+colOrderMap['Personal_Sales__r.OPERTNL_CMPGN_NR__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsAVG_MULT_ORD_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Average_Order_with_Multiples}','ord_AVG_MULT_ORD_AMT');
+colOrderMap['Personal_Sales__r.AVG_MULT_ORD_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsYTD_NET_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.YTD_Net_Sales}','ord_YTD_NET_SLS_AMT');
+colOrderMap['Personal_Sales__r.YTD_NET_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsYTD_AWRD_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.YTD_Award_Sales}','ord_YTD_AWRD_SLS_AMT');
+colOrderMap['Personal_Sales__r.YTD_AWRD_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsAWRD_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Award_Sales}','ord_AWRD_SLS_AMT');
+colOrderMap['Personal_Sales__r.AWRD_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPENDNG_ORD_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Pending_Order_Amount}','ord_PENDNG_ORD_AMT');
+colOrderMap['Personal_Sales__r.PENDNG_ORD_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPENDNG_ORD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Pending_Orders}','ord_PENDNG_ORD_CNT');
+colOrderMap['Personal_Sales__r.PENDNG_ORD_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_DTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Last_Payment_Received_Date}','ord_LAST_PYMT_RECVD_DT');
+colOrderMap['Personal_Sales__r.LAST_PYMT_RECVD_DT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Last_Payment_Received}','ord_LAST_PYMT_RECVD_AMT');
+colOrderMap['Personal_Sales__r.LAST_PYMT_RECVD_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsBAL_DUE_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Balance_Due}','ord_BAL_DUE_AMT');
+colOrderMap['Personal_Sales__r.BAL_DUE_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPAST_DUE_CMPGN_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Campaigns_Past_Due}','ord_PAST_DUE_CMPGN_CNT');
+colOrderMap['Personal_Sales__r.PAST_DUE_CMPGN_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPAST_DUE_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Past_Due}','ord_PAST_DUE_AMT');
+colOrderMap['Personal_Sales__r.PAST_DUE_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsORD_HOLD_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Order_Value}','ord_ORD_HOLD_AMT');
+colOrderMap['Personal_Sales__r.ORD_HOLD_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsMIN_PRSNL_SLS_REQD_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Personal_Sales_Qual_Rpt}','ord_MIN_PRSNL_SLS_REQD_AMT');
+colOrderMap['Personal_Sales__r.MIN_PRSNL_SLS_REQD_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsNET_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Net_Sales}','ord_NET_SLS_AMT');
+colOrderMap['Personal_Sales__r.NET_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsMULT_ORD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Orders_submitted}','ord_MULT_ORD_CNT');
+colOrderMap['Personal_Sales__r.MULT_ORD_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_TOTAL_ORD_RCVDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Active_Downline}','grp_CC_TOTAL_ORD_RCVD');
+colOrderMap['Group_Sales__r.CC_TOTAL_ORD_RCVD__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCUST_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Customers_Served}','ord_CUST_CNT');
+colOrderMap['Personal_Sales__r.CUST_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_TAR_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.At_Risk}','grp_TOTAL_TAR_CNT');
+colOrderMap['Group_Sales__r.TOTAL_TAR_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCMPGN_OF_UDATE_NREnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Nbr_of_Campaigns}','rep_CMPGN_OF_UDATE_NR');
+colOrderMap['Representative__r.CMPGN_OF_UDATE_NR__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_CTT_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Performing_at_Next_Level}','grp_TOTAL_CTT_CNT');
+colOrderMap['Group_Sales__r.TOTAL_CTT_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_PRMOTD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Promoted_Last_Campaign}','grp_TOTAL_PRMOTD_CNT');
+colOrderMap['Group_Sales__r.TOTAL_PRMOTD_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_APPT_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Appointments}','grp_CC_GRP_APPT_CNT');
+colOrderMap['Group_Sales__r.CC_GRP_APPT_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_NEW_REP_1ST_ORD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.1st_Order}','grp_CC_NEW_REP_1ST_ORD_CNT');
+colOrderMap['Group_Sales__r.CC_NEW_REP_1ST_ORD_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_RNSTMT_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Reinstatements}','grp_CC_GRP_RNSTMT_CNT');
+colOrderMap['Group_Sales__r.CC_GRP_RNSTMT_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_RMOVL_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Removals}','grp_CC_GRP_RMOVL_CNT');
+colOrderMap['Group_Sales__r.CC_GRP_RMOVL_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_INHRTD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Inherited}','grp_CC_GRP_INHRTD_CNT');
+colOrderMap['Group_Sales__r.CC_GRP_INHRTD_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GENRTN_1_STF_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Current_Downline}','grp_TOTAL_GENRTN_1_STF_CNT');
+colOrderMap['Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsGENRTN_1_GRP_TITL_CHNG_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Downline_Change_from_Last_Campaign}','grp_GENRTN_1_GRP_TITL_CHNG_CNT');
+colOrderMap['Group_Sales__r.GENRTN_1_GRP_TITL_CHNG_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GRP_TITL_CHNG_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Downline_Change_from_Last_Campaign}','grp_TOTAL_GRP_TITL_CHNG_CNT');
+colOrderMap['Group_Sales__r.TOTAL_GRP_TITL_CHNG_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsAVG_AWRD_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Average_Award_Sales}','ord_AVG_AWRD_SLS_AMT');
+colOrderMap['Group_Sales__r.AVG_AWRD_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_AVG_CUST_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Average_Customers}','grp_CC_GRP_AVG_CUST_CNT');
+colOrderMap['Group_Sales__r.CC_GRP_AVG_CUST_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_PRGRM_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Leadership}','rep_LDRSHP_PRGRM_IND');
+colOrderMap['Representative__r.LDRSHP_PRGRM_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsINACTV_CMPGN_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Nbr_of_Campaigns_with_no_order}','rep_INACTV_CMPGN_CNT');
+colOrderMap['Representative__r.INACTV_CMPGN_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_AWRD_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Group_Award_Sales}','grp_CC_GRP_AWRD_SLS_AMT');
+colOrderMap['Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsGENRTN_1_GRP_ORD_RCVD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.1st_Generation_Active_Downline}','grp_GENRTN_1_GRP_ORD_RCVD_CNT');
+colOrderMap['Group_Sales__r.GENRTN_1_GRP_ORD_RCVD_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GRP_ADDS_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Additions}','grp_TOTAL_GRP_ADDS_CNT');
+colOrderMap['Group_Sales__r.TOTAL_GRP_ADDS_CNT__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.PATD_Certified}','rep_PATD_CERTFCTN_IND');
+colOrderMap['Representative__r.PATD_CERTFCTN_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_P_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Certified_P}','rep_PATD_CERTFCTN_LVL_P_IND');
+colOrderMap['Representative__r.PATD_CERTFCTN_LVL_P_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_A_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Certified_A}','rep_PATD_CERTFCTN_LVL_A_IND');
+colOrderMap['Representative__r.PATD_CERTFCTN_LVL_A_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_T_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Certified_T}','rep_PATD_CERTFCTN_LVL_T_IND');
+colOrderMap['Representative__r.PATD_CERTFCTN_LVL_T_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_D_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Certified_D}','rep_PATD_CERTFCTN_LVL_D_IND');
+colOrderMap['Representative__r.PATD_CERTFCTN_LVL_D_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_APPT_CMPGN_NREnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Appointment_Campaign}','rep_REP_APPT_CMPGN_NR');
+colOrderMap['Representative__r.REP_APPT_CMPGN_NR__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_RMOVL_CMPGN_NREnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Removal_Campaign}','rep_REP_RMOVL_CMPGN_NR');
+colOrderMap['Representative__r.REP_RMOVL_CMPGN_NR__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_RNSTMT_CMPGN_NREnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Reinstatement_Campaign}','rep_REP_RNSTMT_CMPGN_NR');
+colOrderMap['Representative__r.REP_RNSTMT_CMPGN_NR__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TITL_PROMTD_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Promoted}','rep_LDRSHP_TITL_PROMTD_IND');
+colOrderMap['Representative__r.LDRSHP_TITL_PROMTD_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TAR_INDEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.At_Risk}','rep_LDRSHP_TAR_IND');
+colOrderMap['Representative__r.LDRSHP_TAR_IND__c']=colCount++;
+</script>
+</apex:outputPanel>
+
+    
+    <apex:repeat value="{!reportRows}" var="rptRow">
+        <script type="text/javascript">
+        rowData = new Array();
+        rowData.push('{!rptRow.row.Representative__r.Name}');
+        rowData.push('{!rptRow.row.ACCT_NR__c}');
+        rowData.push('{!rptRow.row.Representative__r.SLS_ZONE_CD__c}');
+        rowData.push('{!rptRow.row.Representative__r.Phone}');
+        rowData.push('{!rptRow.row.Representative__r.Email}');
+        rowData.push('{!rptRow.title}');
+        rowData.push('{!rptRow.DownlineGenNbr}');
+        rowData.push('{!rptRow.sellerSts}');
+        rowData.push('{!rptRow.row.Representative__r.LOA_NR__c}');
+        rowData.push('{!rptRow.row.Representative__r.LDRSHP_LOA_NR__c}');
+        rowData.push('{!rptRow.row.Representative__r.Birthday__c}');
+        rowData.push('{!rptRow.row.Representative__r.TERR_IND__c}');
+        rowData.push('{!rptRow.UplineLdrName}');
+        rowData.push('{!rptRow.UplineAcctNbr}');
+        rowData.push('{!rptRow.UplineLdrPhone}');
+        </script>
+
+<apex:outputPanel rendered="{!IsMIN_TO_EARN_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_sales__r.MIN_PRSNL_SLS_REQD_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsBirthdayEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.Birthday__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_APPT_DTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.REP_APPT_DT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsRTURN_AWRD_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.RTURN_AWRD_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsRTURN_NET_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.RTURN_NET_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPercent_of_YTD_Net_SalesEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.Percent_of_YTD_Net_Sales__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPercent_of_Current_Net_SalesEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.Percent_of_Current_Net_Sales__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsORD_SRCE_DESC_TXTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.ORD_SRCE_DESC_TXT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsOPERTNL_CMPGN_NREnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.OPERTNL_CMPGN_NR__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsAVG_MULT_ORD_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.AVG_MULT_ORD_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsYTD_NET_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.YTD_NET_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsYTD_AWRD_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.YTD_AWRD_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsAWRD_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.AWRD_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPENDNG_ORD_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.PENDNG_ORD_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPENDNG_ORD_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.PENDNG_ORD_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_DTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.LAST_PYMT_RECVD_DT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.LAST_PYMT_RECVD_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsBAL_DUE_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.BAL_DUE_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPAST_DUE_CMPGN_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.PAST_DUE_CMPGN_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPAST_DUE_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.PAST_DUE_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsORD_HOLD_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.ORD_HOLD_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsMIN_PRSNL_SLS_REQD_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.MIN_PRSNL_SLS_REQD_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsNET_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.NET_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsMULT_ORD_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.MULT_ORD_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_TOTAL_ORD_RCVDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.CC_TOTAL_ORD_RCVD__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCUST_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Personal_Sales__r.CUST_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_TAR_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_TAR_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCMPGN_OF_UDATE_NREnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.CMPGN_OF_UDATE_NR__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_CTT_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_CTT_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_PRMOTD_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_PRMOTD_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_APPT_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_APPT_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_NEW_REP_1ST_ORD_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.CC_NEW_REP_1ST_ORD_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_RNSTMT_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Reinstatements}','grp_CC_GRP_RNSTMT_CNT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_RMOVL_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Removals}','grp_CC_GRP_RMOVL_CNT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_INHRTD_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Inherited}','grp_CC_GRP_INHRTD_CNT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GENRTN_1_STF_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Current_Downline}','grp_TOTAL_GENRTN_1_STF_CNT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsGENRTN_1_GRP_TITL_CHNG_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Downline_Change_from_Last_Campaign}','grp_GENRTN_1_GRP_TITL_CHNG_CNT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GRP_TITL_CHNG_CNTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Downline_Change_from_Last_Campaign}','grp_TOTAL_GRP_TITL_CHNG_CNT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsAVG_AWRD_SLS_AMTEnabled}">
+<script type='text/javascript'>
+data.addColumn('string','{!$Label.Average_Award_Sales}','ord_AVG_AWRD_SLS_AMT');
+</script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_AVG_CUST_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_AVG_CUST_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_PRGRM_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_PRGRM_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsINACTV_CMPGN_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.INACTV_CMPGN_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_AWRD_SLS_AMTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsGENRTN_1_GRP_ORD_RCVD_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.GENRTN_1_GRP_ORD_RCVD_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GRP_ADDS_CNTEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_GRP_ADDS_CNT__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_P_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_P_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_A_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_A_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_T_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_T_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_D_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_D_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_APPT_CMPGN_NREnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.REP_APPT_CMPGN_NR__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_RMOVL_CMPGN_NREnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.REP_RMOVL_CMPGN_NR__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_RNSTMT_CMPGN_NREnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.REP_RNSTMT_CMPGN_NR__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TITL_PROMTD_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_TITL_PROMTD_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TAR_INDEnabled}">
+    <script type="text/javascript">
+        rowData.push('<apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_TAR_IND__c}"/>');
+    </script>
+</apex:outputPanel>
+
+        
+        <script type="text/javascript">
+        myData.push(rowData);
+        </script>
+    </apex:repeat>
+    <div id="table"></div>
+    <div id="toolbar_div"></div>
+    <script type="text/javascript">
+        data.addRows(myData);
+        /*var formatString = '<a href="#" onClick="showRepInfo(\'{0}\',\'{12}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',\'{6}\',\'{7}\',\'{8}\',\'{9}\',\'{10}\',\'{11}\',\'{13}\',\'{14}\', \'{15}\')" onmouseout="UnTip()">';;
+        formatString+= '<apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/infoicon.gif')}" width="15" height="15"/>';
+        var formatter = new google.visualization.PatternFormat(formatString );
+        formatter.format(data,[1,0,12,2,3,4,5,6,7,8,9,10,11,13,14,15]); 
+        */
+        visualization = new google.visualization.Table(document.getElementById('table'));
+        var dataView = new google.visualization.DataView(data);
+        function myClickHandler(){
+          var selection = visualization.getSelection();
+          var selRep = myData[selection[0].row];
+          
+          showRepInfo(selRep[0],selRep[12],selRep[2],selRep[3],selRep[4],
+                      selRep[5],selRep[6],selRep[7],selRep[8],selRep[9],
+                      selRep[10],selRep[11],selRep[13],selRep[14],selRep[15]);
+          
+        }
+        google.visualization.events.addListener(visualization, 'select', myClickHandler);
+        dataView.hideColumns([1,2,3,4,5,6,11,12,13,14]);
+        var colOrder = new Array();
+        colOrder.push(0);
+    </script>
+    
+    <apex:repeat value="{!DisplayColumns}" var="colName">
+    <script type="text/javascript">
+    	var colIndex = colOrderMap['{!TRIM(colName)}'];
+    	if(colIndex){
+	    	colOrder.push(colIndex);
+	    }
+	</script>
+    </apex:repeat>
+    <script type="text/javascript">
+    	dataView.setColumns(colOrder);
+        visualization.draw(dataView, {showRowNumber:false,allowHtml: true,width: 950, height: 350,
+                            cssClassNames:{headerRow: 'information_header'}});
+        
+
+    </script>
+    </apex:outputPanel>
+
+            </apex:define>
+    </apex:composition>
+</apex:page>
+                            	

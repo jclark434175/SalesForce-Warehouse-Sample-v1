@@ -1,0 +1,117 @@
+<apex:page showHeader="false" sidebar="false" controller="UpdateUserPrefController" action="{!init}">
+	<apex:composition template="LeaderPageTemplate">
+		<apex:define name="content">
+			<script type="text/javascript">
+				function selectSlsOrg(idVal){
+					var fld = document.getElementById('{!$Component.theForm.selOrgCdId}');
+					fld.value = idVal;
+				}
+			</script>
+			<apex:form id="theForm">
+				<apex:inputHidden id="selOrgCdId" value="{!selOrgCdId}"/>
+				<table width="700" border="0" cellspacing="0" cellpadding="1">
+					<tr>
+						<td colspan="3" height="15" id="spacing_from_header"></td>
+					</tr>
+					<tr>
+						<td width="20" id="spacer_left"></td>
+						<td>
+		                    <td align="left">
+			         			<apex:commandLink styleClass="detailLink" 
+			         								action="{!updatePreferences}" 
+			         								value="{!$Label.Update_Profile}"/>
+						</td>
+						<td align="right" id="headings">
+							<c:ReturnToPageButton />
+						</td>
+					</tr>
+				</table>
+				<div id="main" class="table_with_scrolls" style="height:400px">			
+				<table width="700" border="0" cellspacing="0" cellpadding="1">
+					<tr>
+						<td width="20" id="spacer_left"></td>
+						<td>
+							<table width="100%" border="0" cellspacing="0" cellpadding="1">
+							   <tr>
+								    <td align="left" valign="top" colspan="2">
+								        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+											<apex:outputPanel rendered="{!IsError}">
+												<tr>
+													<td colspan="3" class="err_msg">
+													{!$Label.Update_Pref_Err_1} {!$Label.Update_Pref_Err_2}			
+													</td>
+													
+												</tr>
+											</apex:outputPanel>
+											<apex:outputPanel rendered="{!updateSuccess}">
+												<tr>
+													<td colspan="3">
+													{!$Label.Update_Confirmation_Msg}
+													</td>
+													
+												</tr>
+											</apex:outputPanel>
+									      <tr>
+							                    <td width="2%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+							                    <td width="95%" background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">{!$Label.Update_Profile}</td>
+							                    <td width="3%"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+								     	 </tr>
+								   		</table>
+								    </td>
+								</tr>
+								<tr align="left" class="display_row_odd">
+									<td class="data_cell" align="left">{!$Label.Language}</td>
+									<td class="data_cell" align="left"><apex:inputField value="{!userRec.LanguageLocaleKey}"/></td>
+								</tr>
+								<tr align="left" class="display_row_even">
+									<td class="data_cell" align="left">{!$Label.Request_Mobile_Access}</td>
+									<td class="data_cell" align="left">
+										<apex:inputField value="{!userRec.UserPermissionsMobileUser}"/>
+									</td>
+								</tr>
+								<apex:outputPanel rendered="{!slsOrgSize>0}">
+									<tr align="left" class="display_row_even">
+										<td colspan="2" align="left" >Select a {!$Label.Zone}
+											({!$Label.Current} {!$Label.Division} : {!userRec.DFALT_DIV_NM__c} / {!$Label.Current} {!$Label.Zone} : {!userRec.DFALT_ZONE_CD__c})
+									</td>
+									</tr>
+									<apex:outputPanel rendered="{!userProfile='Avon Division Manager'}">
+										<tr align="left" class="display_row_odd">
+											<td align="left" class="data_cell">
+												<apex:outputPanel rendered="{!LEN(userRec.DFALT_ZONE_CD__c)=0}">
+												<input type="radio" name="selOrgCd" onClick="selectSlsOrg('All')" checked="true"/>
+												</apex:outputPanel>
+												<apex:outputPanel rendered="{!LEN(userRec.DFALT_ZONE_CD__c)>0}">
+												<input type="radio" name="selOrgCd" onClick="selectSlsOrg('All')"/>
+												</apex:outputPanel>
+											</td>
+											<td align="left" class="data_cell">{!$Label.All_Zones}</td>
+										</tr>
+									</apex:outputPanel>
+									<apex:repeat value="{!allowedSlsOrgs}" var="row">
+										<tr align="left" class="{!IF(row.oddRow,'display_row_odd','display_row_even')}">
+											<td align="left" class="data_cell">
+												<apex:outputPanel rendered="{!row.selected}">
+												<input type="radio" name="selOrgCd" onClick="selectSlsOrg('{!row.SalesOrgCd}')" checked="true"/>
+												</apex:outputPanel>
+												<apex:outputPanel rendered="{!NOT(row.selected)}">
+												<input type="radio" name="selOrgCd" onClick="selectSlsOrg('{!row.SalesOrgCd}')"/>
+												</apex:outputPanel>
+											</td>
+											<td align="left" class="data_cell">
+												<apex:outputText value="{!$Label.Zone}"/> - {!row.SalesOrgCd}
+											</td>
+										</tr>
+									</apex:repeat>
+								</apex:outputPanel>
+								
+							</table>
+						</td>
+					</tr>
+				</table>
+				</div>
+			</apex:form>
+		</apex:define>
+</apex:composition>
+</apex:page>
+                            	

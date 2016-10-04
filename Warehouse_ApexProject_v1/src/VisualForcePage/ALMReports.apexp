@@ -1,0 +1,19 @@
+<apex:page showHeader="false" sidebar="false" controller="CampaignReportsController" action="{!init}">
+    <apex:composition template="LeaderPageTemplate">
+            <apex:define name="content">
+			    <table width="920" border="0" cellspacing="0" cellpadding="1">
+			        <tr>
+			            <td align="right">
+			                <c:ReturnToPageButton />
+			            </td>
+			        </tr>
+			    </table>
+                <div id="mainContent" class="table_with_scrolls" style="height:415px;width:930px">
+                    <c:MarketReportLinks marketId="{!currUsr.MRKT_ID__c}"
+                                        allReports="false"/>                                
+                </div>
+                <!--Zishan 8/19/2009 Added  Additions_Reinstatements_Removals-->
+            </apex:define>
+    </apex:composition>
+</apex:page>
+                           	

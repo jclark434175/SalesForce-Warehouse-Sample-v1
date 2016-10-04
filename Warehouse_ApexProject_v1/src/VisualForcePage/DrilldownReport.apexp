@@ -1,0 +1,674 @@
+<apex:page controller="DrilldownController" action="{!init}" showHeader="false">
+    <apex:composition template="LeaderPageTemplate">
+            <apex:define name="content">
+                <script type="text/javascript" src="{!URLFOR($Resource.wz_tooltip_js)}"></script>
+                <script type="text/javascript">
+                    String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
+                    function showRepInfo(repName,terrInd,acctNbr,slsZone,phoneNbr,emailId,title,
+                                         genNbr,sellSts,avonLOA,ldrLOA,bDay,uplineNm,uplnAcctNbr,uplnPhn){
+                        var rowCnt=0;
+                        var repInfoHtml = '<table border="0" cellspacing="1" cellpadding="0">';
+                        var usrProfile = '{!userProfile}';
+                        repInfoHtml +=getRowHtml('{!$Label.Name}',repName,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Account_Nbr}',acctNbr,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Zone}',slsZone,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Home_Phone}',phoneNbr,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.eMail2}',emailId,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Title}',title,(++rowCnt));
+                        if(usrProfile=='Avon Leader'){
+                            repInfoHtml +=getRowHtml('{!$Label.Generation}',genNbr,(++rowCnt));
+                        }
+                        repInfoHtml +=getRowHtml('{!$Label.Seller_Status}',sellSts,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Avon_Length_of_Association}',avonLOA,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Length_of_Association_in_Leadership}',ldrLOA,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Birthdate}',bDay,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Territory_Code}',terrInd,(++rowCnt));
+                        repInfoHtml +='<tr class="information_header"><td colspan="2" nowrap="nowrap" align="center" bgcolor="#f8dfdf"><b>{!$Label.Upline}</b></td></tr>';
+                        repInfoHtml +=getRowHtml('{!$Label.Upline}',uplineNm,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Account_Nbr}',uplnAcctNbr,(++rowCnt));
+                        repInfoHtml +=getRowHtml('{!$Label.Home_Phone}',uplnPhn,(++rowCnt));
+                        repInfoHtml+= '</table>';
+                        Tip(    repInfoHtml,CLOSEBTN,true,CLICKSTICKY,true,OFFSETX,20,
+                                TITLE,'{!$Label.Representative}',TITLEFONTCOLOR,'black',TITLEBGCOLOR,'#FCF4F4',
+                                BGCOLOR,'#ffffff',BORDERSTYLE,'solid',SHADOW,true,
+                                HEIGHT,150,WIDTH,375
+                                );
+                    }                    
+                    function getRowHtml(labelStr,data,rowNbr){
+                        var rowClass = (rowNbr%2 ==0)?'display_row_even':'display_row_odd';
+                        var tempHtml = '<tr class="'+rowClass+'"><td nowrap="nowrap" width="125" class="data_cell" align="left">'+labelStr+'</td>';
+                        tempHtml +='<td nowrap="nowrap" width="100" class="data_cell">'+data+'</td></tr>';
+                        return tempHtml;
+                    }
+
+                    function setSortColumn(colName){
+                        var usrSortFld = document.getElementById('{!$Component.theForm.usrSort}');
+                        usrSortFld.value=colName;
+                        showHideMessage('visible');
+                    }
+                    
+                    function setMailPlan(){
+                        var usrMplanFld = document.getElementById('{!$Component.theForm.usrMplan}');
+                        var mplanSel = document.getElementById('mailPlansSelect');
+                        var selVal = mplanSel.options[mplanSel.selectedIndex];
+                        usrMplanFld.value = selVal.value;
+                    }
+                    function setTitle(){
+                        var usrTitlFld = document.getElementById('{!$Component.theForm.usrTitl}');
+                        var titlSel = document.getElementById('ldrTitles');
+                        var selVal = titlSel.options[titlSel.selectedIndex];
+                        usrTitlFld.value = selVal.value;
+                    }
+                    function selectAll(){
+                        setCBValues(true);
+                    }
+                    function clearAll(){
+                        setCBValues(false);
+                    }
+                    function setCBValues(checkUnCheck){
+                        var allCB = document.getElementsByTagName('input');
+                        var currCB;
+                        for(var idx=0;idx<allCB.length;idx++){
+                            currCB = allCB[idx];
+                            if(currCB.id.endsWith('repSelCBox') || currCB.id.endsWith('repSelCBox1')){
+                                currCB.checked = checkUnCheck;
+                            }
+                        }
+                    }
+                    function setZone(){
+                        var zoneFld = document.getElementById('{!$Component.theForm.zoneFilter}');
+                        var znSel = document.getElementById('zoneSelect');
+                        var selVal = znSel.options[znSel.selectedIndex];
+                        zoneFld.value = selVal.value;
+                    }
+                    function showHideMessage(msgState){
+                        var processMsg = document.getElementById('processing_msg');
+                        processMsg.style.height=screen.height+'px';
+                        processMsg.style.width=screen.width+'px';
+                        processMsg.style.visibility=msgState;
+                        
+                    }
+                    
+                    
+                </script>
+                <apex:outputPanel rendered="{!pageError}">
+                <script type="text/javascript">
+                	window.location="/apex/ErrorPage";
+                </script>
+                </apex:outputPanel>
+                <apex:form id="theform">
+                     <apex:inputHidden id="usrSort" value="{!usrSort}"/>
+                     <apex:inputHidden id="usrMplan" value="{!currMailPlan}"/>
+                     <apex:inputHidden id="usrTitl" value="{!currTitle}"/>
+                     <apex:inputHidden id="zoneFilter" value="{!zoneFilter}"/>
+                     <table id="filter_header" width="950" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td height="10">
+                            </td>
+                        </tr>
+                        <tr align="right">
+                            <td align="right">
+                                <table border="0" cellspacing="0" cellpadding="0">
+                                  <tr align="right">
+                                    <td>
+                                       <c:ReturnToPageButton />
+                                    </td>
+                                    <apex:outputPanel rendered="{!startRow>100}">
+                                        <td> < <apex:commandLink value="{!$Label.Previous}" onClick="showHideMessage('visible')" action="{!previous}" /> | </td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!reportRows.size>0}">
+                                        <td>( {!$Label.Displaying} <apex:outputText value="{!((pageNbr-1)*100)+1}"/> - <apex:outputText value="{!((pageNbr-1)*100)+reportRows.size}"/> )</td>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!reportRows.size=100}">
+                                        <td> | <apex:commandLink value="{!$Label.Next}" onClick="showHideMessage('visible')" action="{!next}" rendered="{!reportRows.size=100}"/> > </td>
+                                    </apex:outputPanel>
+                                  </tr>
+                                </table>
+                            </td>                        
+                        </tr>
+                        
+                        <tr>
+                            <td>
+                                <apex:outputPanel rendered="{!market.Mail_Plan_Enabled__c}">
+                                <table border="0" cellspacing="0" cellpadding="0">
+                                  <tr>
+                                    <td width="10"> </td>
+                                    <td width="10"> </td>
+                                    <td nowrap="nowrap">
+                                        <a href="javascript:selectAll()" class="actions">{!$Label.Select_All}</a> | <a href="javascript:clearAll()" class="actions">{!$Label.Clear_All} </a>
+                                    </td>
+                                    <td nowrap="nowrap">
+                                        <apex:outputText value="{!$Label.Filter_by_Generation}" rendered="{!userProfile='Avon Leader'}"/>
+                                        <apex:outputText value="{!$Label.Filter_by_Title}" rendered="{!OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager')}"/>
+                                        
+                                    </td>
+                                    <td width="10"> </td>
+                                    
+                                    <td width="75">
+                                        <apex:inputField id="geneFilter" value="{!srchCrit.Generation_Filter__c}" rendered="{!userProfile='Avon Leader'}"/>
+                                        <apex:outputPanel rendered="{!OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager')}">
+                                        <select id="ldrTitles" onChange="setTitle()">
+                                            <apex:repeat value="{!ldrTitles}" var="titl">
+                                              <apex:outputPanel rendered="{!AND(currTitle=titl.LDRSHP_TITL_LVL_NR__c,titl.LDRSHP_TITL_LVL_NR__c!='UQ')}">
+                                                  <option value="{!titl.LDRSHP_TITL_LVL_NR__c}" selected>{!titl.LCL_LDRSHP_TITL_LANG_DESC_TXT__c}</option>
+                                              </apex:outputPanel>
+                                              <apex:outputPanel rendered="{!AND(currTitle!=titl.LDRSHP_TITL_LVL_NR__c,titl.LDRSHP_TITL_LVL_NR__c!='UQ')}">
+                                                  <option value="{!titl.LDRSHP_TITL_LVL_NR__c}">{!titl.LCL_LDRSHP_TITL_LANG_DESC_TXT__c}</option>
+                                              </apex:outputPanel>
+                                            </apex:repeat>
+                                        </select>
+                                        </apex:outputPanel>
+                                        
+                                    </td>
+                                    <td width="10"> </td>
+                                    <td nowrap="nowrap">{!$Label.Filter_by_Mail_Plan}</td>
+                                    <td width="10"> </td>
+                                    <td width="75">
+                                    <select id="mailPlansSelect" onChange="setMailPlan()">
+                                      <option value="-None-">{!$Label.Select_a_Mail_Plan}</option>
+                                          <apex:outputPanel rendered="{!currMailPlan = 'Closing Next'}">
+                                              <option value="Closing Next" selected>{!$Label.Next} {!nbrOfMailPlns} {!$Label.Mail_Plans}</option>
+                                          </apex:outputPanel>
+                                          <apex:outputPanel rendered="{!currMailPlan != 'Closing Next'}">
+                                              <option value="Closing Next">{!$Label.Next} {!nbrOfMailPlns} {!$Label.Mail_Plans}</option>
+                                          </apex:outputPanel>
+                                        <apex:repeat value="{!mailPlans}" var="mplan">
+                                          <apex:outputPanel rendered="{!currMailPlan = mplan}">
+                                              <option value="{!mplan}" selected>{!mplan}</option>
+                                          </apex:outputPanel>
+                                          <apex:outputPanel rendered="{!currMailPlan != mplan}">
+                                              <option value="{!mplan}">{!mplan}</option>
+                                          </apex:outputPanel>
+                                        </apex:repeat>
+                                    </select>
+                                    
+                                    </td>
+                                    <td width="10"> </td>
+                                    <td>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                            <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                <apex:commandLink value="{!$Label.Go}" onClick="showHideMessage('visible')" action="{!filterRecords}"/>
+                                            </td>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                          </tr>
+                                        </table>
+                    
+                                    </td>
+                                    <td>
+                                        <apex:outputPanel rendered="{!userProfile='Avon Division Manager'}">
+                                        <td>
+                                            <select id="zoneSelect" onChange="setZone()">
+                                              <option value="All">{!$Label.Select_a_Market}</option>
+                                                <apex:repeat value="{!zoneList}" var="zoneCd">
+                                                  <apex:outputPanel rendered="{!zoneFilter = zoneCd}">
+                                                      <option value="{!zoneCd}" selected>{!zoneCd}</option>
+                                                  </apex:outputPanel>
+                                                  <apex:outputPanel rendered="{!zoneFilter != zoneCd}">
+                                                      <option value="{!zoneCd}">{!zoneCd}</option>
+                                                  </apex:outputPanel>
+                                                </apex:repeat>
+                                            </select>
+                                        </td>
+                                        </apex:outputPanel>
+                    
+                                    </td>
+                                    <td>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                            <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                <apex:commandLink value="{!$Label.Print_Selected}" action="{!printSelected}"/>
+                                            </td>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                          </tr>
+                                        </table>
+                    
+                                    </td>
+                                    <td>
+                                        <apex:outputPanel rendered="{!OR(srchCrit.Generation_Filter__c='1st Generation',
+                                                                         userProfile!='Avon Leader')}">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                            <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                <apex:commandLink value="{!$Label.Email_Selected}" action="{!emailSelected}"/>
+                                            </td>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                          </tr>
+                                        </table>
+                                        </apex:outputPanel>
+                                    </td>
+                                  </tr>
+                                </table>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!NOT(market.Mail_Plan_Enabled__c)}">
+                                <table border="0" cellspacing="0" cellpadding="0">
+                                  <tr>
+                                    <td width="10"> </td>
+                                    <td nowrap="nowrap">
+                                        <a href="javascript:selectAll()" class="actions">{!$Label.Select_All}</a> | <a href="javascript:clearAll()" class="actions">{!$Label.Clear_All}</a>
+                                    </td>
+                                    <td width="10"> </td>
+                                    <td nowrap="nowrap">
+                                        <apex:outputText value="{!$Label.Filter_by_Generation}" rendered="{!userProfile='Avon Leader'}"/>
+                                        <apex:outputText value="{!$Label.Filter_by_Title}" rendered="{!userProfile='Avon Zone Manager'}"/>
+                                    </td>
+                                    <td width="10"> </td>
+                                    <td>
+                                        <apex:outputPanel rendered="{!userProfile='Avon Division Manager'}">
+                                        <td>
+                                            <select id="zoneSelect" onChange="setZone()">
+                                              <option value="All">{!$Label.Select_a_Market}</option>
+                                                <apex:repeat value="{!zoneList}" var="zoneCd">
+                                                  <apex:outputPanel rendered="{!zoneFilter = zoneCd}">
+                                                      <option value="{!zoneCd}" selected>{!zoneCd}</option>
+                                                  </apex:outputPanel>
+                                                  <apex:outputPanel rendered="{!zoneFilter != zoneCd}">
+                                                      <option value="{!zoneCd}">{!zoneCd}</option>
+                                                  </apex:outputPanel>
+                                                </apex:repeat>
+                                            </select>
+                                        </td>
+                                        </apex:outputPanel>
+                    
+                                    </td>
+                                    <td width="10"> </td>
+                                    <td width="75">
+                                        <apex:inputField id="geneFilter1" value="{!srchCrit.Generation_Filter__c}" rendered="{!userProfile='Avon Leader'}"/>
+                                        <apex:outputPanel rendered="{!OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager')}">
+                                        <select id="ldrTitles" onChange="setTitle()">
+                                            <apex:repeat value="{!ldrTitles}" var="titl">
+                                              <apex:outputPanel rendered="{!AND(currTitle=titl.LDRSHP_TITL_LVL_NR__c,titl.LDRSHP_TITL_LVL_NR__c!='UQ')}">
+                                                  <option value="{!titl.LDRSHP_TITL_LVL_NR__c}" selected>{!titl.LCL_LDRSHP_TITL_LANG_DESC_TXT__c}</option>
+                                              </apex:outputPanel>
+                                              <apex:outputPanel rendered="{!AND(currTitle!=titl.LDRSHP_TITL_LVL_NR__c,titl.LDRSHP_TITL_LVL_NR__c!='UQ')}">
+                                                  <option value="{!titl.LDRSHP_TITL_LVL_NR__c}">{!titl.LCL_LDRSHP_TITL_LANG_DESC_TXT__c}</option>
+                                              </apex:outputPanel>
+                                            </apex:repeat>
+                                        </select>
+                                        </apex:outputPanel>
+                                    </td>
+                                    <td width="10"> </td>
+                                    <td nowrap="nowrap"> </td>
+                                    <td width="10"> </td>
+                                    <td width="10"> </td>
+                                    <td width="10"> </td>
+                                    <td>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                            <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                <apex:commandLink onClick="showHideMessage('visible')" value="{!$Label.Go}" action="{!filterRecords}"/>
+                                            </td>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                          </tr>
+                                        </table>
+                    
+                                    </td>
+                                    <td>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                            <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                <apex:commandLink value="{!$Label.Print_Selected}" action="{!printSelected}"/>
+                                            </td>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                          </tr>
+                                        </table>
+                    
+                                    </td>
+                                    <td>
+                                        <apex:outputPanel rendered="{!OR(srchCrit.Generation_Filter__c='1st Generation',userProfile!='Avon Leader')}">
+                                    
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                          <tr>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_left.gif')}"></td>
+                                            <td background="{!URLFOR($Resource.AvonSiteAssets,'images/button_middle.gif')}">
+                                                <apex:commandLink value="{!$Label.Email_Selected}" action="{!emailSelected}"/>
+                                            </td>
+                                            <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/button_right.gif')}"></td>
+                                          </tr>
+                                        </table>
+                                        </apex:outputPanel>                    
+                                    </td>                                   
+                                  </tr>
+                                </table>
+                                </apex:outputPanel>
+
+                            </td>
+                        </tr>   
+                        <tr>
+                        <td height="10"></td>
+                        </tr>
+                        <tr>
+                        <td >
+                        <apex:outputPanel rendered="{!NOT(zoneSelErr)}">
+                            <table width="950" cellpadding="0" cellspacing="0" border="0" height="26">
+                                <tr>
+                                    <td width="5"> </td>
+                                    <td width="3"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_left_edge.gif')}"/></td>
+                                    <td background="{!URLFOR($Resource.AvonSiteAssets,'images/header_background.gif')}" class="table_heading">
+                                    <apex:outputText value="{!$Label.Orders_Not_Submitted}" rendered="{!OR(rptCfg.Report_Type__c='Orders_Not_Submitted',rptCfg.Report_Type__c='AI_Orders_Not_Submitted')}"/>
+                                    <apex:outputText value="{!$Label.Orders_on_Hold}" rendered="{!OR(rptCfg.Report_Type__c='Orders_on_Hold',rptCfg.Report_Type__c='AI_Orders_on_Hold')}"/>
+                                    <apex:outputText value="{!$Label.Orders_Under_Minimum}" rendered="{!OR(rptCfg.Report_Type__c='Orders_below_Minimum',rptCfg.Report_Type__c='AI_Orders_below_Minimum')}"/>
+                                    <apex:outputText value="{!$Label.Orders_at_Minimum}" rendered="{!OR(rptCfg.Report_Type__c='Orders_at_Minimum',rptCfg.Report_Type__c='AI_Orders_at_Minimum')}"/>
+                                    <apex:outputText value="{!$Label.Pending_Orders}" rendered="{!OR(rptCfg.Report_Type__c='Pending_Orders',rptCfg.Report_Type__c='AI_Pending_Orders')}"/>
+                                    <apex:outputText value="{!$Label.Rpt_Orders_received}" rendered="{!OR(rptCfg.Report_Type__c='Total_Orders_received',rptCfg.Report_Type__c='AI_Total_Orders_received')}"/>
+                                    <apex:outputText value="{!$Label.Return_Orders}" rendered="{!OR(rptCfg.Report_Type__c='Return_Orders',rptCfg.Report_Type__c='AI_Return_Orders')}"/>
+                                    <apex:outputText value="{!$Label.Achieved_Minimum_Order}" rendered="{!OR(rptCfg.Report_Type__c='Achieved_Minimum_Order',rptCfg.Report_Type__c='AI_Achieved_Minimum_Order')}"/>
+                                    <apex:outputText value="{!$Label.Balance_Past_Due}" rendered="{!OR(rptCfg.Report_Type__c='Balance_Past_Due',rptCfg.Report_Type__c='AI_Balance_Past_Due')}"/>
+                                    <apex:outputText value="{!$Label.Personal_Sales_Qual}" rendered="{!rptCfg.Report_Type__c='Personal_Sales_Qual'}"/>
+                                    <apex:outputText value="{!$Label.Returns}" rendered="{!OR(rptCfg.Report_Type__c='Returns',rptCfg.Report_Type__c='AI_Returns')}"/>
+                                    <apex:outputText value="{!$Label.Additions_Reinstatements_Removals}" rendered="{!rptCfg.Report_Type__c='Additions_Reinstatements_Removals'}"/>
+                                    <apex:outputText value="{!$Label.Birthday_Anniversaries}" rendered="{!rptCfg.Report_Type__c='Birthday_Anniversaries'}"/>
+                                    <apex:outputText value="{!$Label.Candidate_Development}" rendered="{!rptCfg.Report_Type__c='Candidate_Development'}"/>
+                                    <apex:outputText value="{!$Label.Development_LOA_1_6}" rendered="{!rptCfg.Report_Type__c='Development_LOA_1_6'}"/>
+                                    <apex:outputText value="{!$Label.Downline_Detail}" rendered="{!rptCfg.Report_Type__c='Downline_Detail'}"/>
+                                    <apex:outputText value="{!$Label.Inactive}" rendered="{!rptCfg.Report_Type__c='Inactive'}"/>
+                                    <apex:outputText value="{!$Label.Inherited}" rendered="{!rptCfg.Report_Type__c='Inherited'}"/>
+                                    <apex:outputText value="{!$Label.PATD_Certified}" rendered="{!rptCfg.Report_Type__c='PATD_Certified'}"/>
+                                    <apex:outputText value="{!$Label.Ranking_and_Recognition}" rendered="{!rptCfg.Report_Type__c='Ranking_and_Recognition'}"/>
+                                    <apex:outputText value="{!$Label.Title_Change}" rendered="{!rptCfg.Report_Type__c='Title_Change'}"/>
+									<apex:outputText value="{!$Label.Romania_Brochures_Not_Purchased}" rendered="{!rptCfg.Report_Type__c='Brochures_Not_Purchased'}"/>
+									<apex:outputText value="{!$Label.Romania_1st_Order_Award_Sales}" rendered="{!rptCfg.Report_Type__c='1st_Order_Award_Sales'}"/>
+                                    
+                                    <!--  
+                                        For additions /reinsta/removals report, the total count does'nt make sense
+                                        as the report display a different criteria v/s the total
+                                    -->
+                                    (  
+                                    <apex:outputPanel rendered="{!AND(rptCfg.Report_Type__c!='Downline_Detail',
+                                                                      rptCfg.Report_Type__c!='Birthday_Anniversaries',
+                                                                      LEN(recCnt)>0
+                                                                      )}">
+                                    {!$Label.Total}: {!recCnt} / 
+                                    </apex:outputPanel>
+                                    {!$Label.Displaying} 
+                                    <apex:outputPanel rendered="{!reportRows.size>0}">
+                                        <apex:outputText value="{!((pageNbr-1)*100)+1}"/> - <apex:outputText value="{!((pageNbr-1)*100)+reportRows.size}"/>
+                                    </apex:outputPanel>
+                                    <apex:outputText value="0" rendered="{!reportRows.size=0}"/> 
+                                    <apex:outputText value="{!$Label.This_Generation}" rendered="{!userProfile='Avon Leader'}"/>
+                                    <apex:outputText value="{!$Label.This_Title}" rendered="{!OR(userProfile='Avon Zone Manager',userProfile='Avon Division Manager')}"/> )
+                                    </td>
+                                    <td width="3"><img src="{!URLFOR($Resource.AvonSiteAssets,'images/table_right_edge.gif')}"/></td>
+                                </tr>
+                            </table>
+                            </apex:outputPanel>
+                        </td>
+                        </tr>
+                    </table>
+                    <div id="processing_msg" style="position:absolute;left:0px;top:0px;z-index:4;background-color:#FFFFFF;opacity:.90;filter:Alpha(opacity=90);">
+                        <div id="inner_msg_table" style="position:relative;vertical-align:middle;top:30%">
+                          <table width="100%" border="0" cellpadding="0" cellspacing="1">
+                            <tr align="center" >
+                              <td><img src="{!URLFOR($Resource.AvonSiteAssets,'images/processing.gif')}"></td>
+                            </tr>
+                            <tr align="center" >
+                              <td>{!$Label.Processing_Status_Message}</td>
+                            </tr>
+                          </table>
+                      </div>
+                    </div>
+                <script type="text/javascript">
+                    showHideMessage('hidden');
+                </script>
+                    
+                    <table width="950" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="5"> </td>
+                            <td>
+                            <apex:outputPanel rendered="{!NOT(zoneSelErr)}">
+                            <table width="950" border="0" cellpadding="0" cellspacing="0">
+                                <tr class="information_header">                   
+                                <td  width="20">  </td>
+                                <apex:outputPanel rendered="{!userProfile='Avon Leader'}">
+                                    <td width="20">  </td>
+                                </apex:outputPanel>
+                                <td  width="180">
+                                    <apex:commandLink onClick="setSortColumn('Representative__r.LastName')" action="{!sortReport}">{!$Label.Name}</apex:commandLink>
+                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LastName',IsAscending)}"/>
+                                    <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LastName',NOT(IsAscending))}"/>
+                                </td>
+                                <td width="20">               </td>
+    <apex:outputPanel rendered="{!IsOPERTNL_CMPGN_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.OPERTNL_CMPGN_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Nbr_of_Campaigns}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.OPERTNL_CMPGN_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.OPERTNL_CMPGN_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsMIN_TO_EARN_AMTEnabled}"><td width="100"><apex:outputText value="{!$Label.Needed_for_Minimum}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLOA_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LOA_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Length_of_Association}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LOA_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LOA_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsBirthdayEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.Birthdate')" action="{!sortReport}"><apex:outputText value="{!$Label.Birthday}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.Birthdate',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.Birthdate',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsREP_APPT_DTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.REP_APPT_DT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Anniversary}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.REP_APPT_DT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.REP_APPT_DT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsRTURN_AWRD_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.RTURN_AWRD_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Return_Award_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.RTURN_AWRD_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.RTURN_AWRD_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+
+    <apex:outputPanel rendered="{!IsRTURN_NET_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.RTURN_NET_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Return_net_sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.RTURN_NET_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.RTURN_NET_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPercent_of_YTD_Net_SalesEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.Percent_of_YTD_Net_Sales__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Pct_of_Year_to_Date_Net_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.Percent_of_YTD_Net_Sales__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.Percent_of_YTD_Net_Sales__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPercent_of_Current_Net_SalesEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.Percent_of_Current_Net_Sales__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Pct_of_Current_Net_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.Percent_of_Current_Net_Sales__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.Percent_of_Current_Net_Sales__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsORD_SRCE_DESC_TXTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.ORD_SRCE_DESC_TXT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Order_Placement_Method}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.ORD_SRCE_DESC_TXT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.ORD_SRCE_DESC_TXT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsAVG_MULT_ORD_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.AVG_MULT_ORD_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Average_Order_with_Multiples}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.AVG_MULT_ORD_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.AVG_MULT_ORD_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsYTD_NET_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.YTD_NET_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.YTD_Net_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.YTD_NET_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.YTD_NET_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsYTD_AWRD_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.YTD_AWRD_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.YTD_Award_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.YTD_AWRD_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.YTD_AWRD_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsAWRD_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.AWRD_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Award_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.AWRD_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.AWRD_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+	<apex:outputPanel rendered="{!IsPRSNL_QLFR_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.PRSNL_QLFR_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Personal_Qualifier}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PRSNL_QLFR_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PRSNL_QLFR_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+<!--      <apex:outputPanel rendered="{!IsNC_PRSNL_QLFR_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.NC_PRSNL_QLFR_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Next_Campaign_Personal_Qualifier}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.NC_PRSNL_QLFR_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.NC_PRSNL_QLFR_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>-->
+    <apex:outputPanel rendered="{!IsPENDNG_ORD_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.PENDNG_ORD_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Pending_Order_Amount}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PENDNG_ORD_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PENDNG_ORD_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPENDNG_ORD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.PENDNG_ORD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Pending_Orders}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PENDNG_ORD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PENDNG_ORD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_DTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.LAST_PYMT_RECVD_DT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Last_Payment_Received_Date}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.LAST_PYMT_RECVD_DT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.LAST_PYMT_RECVD_DT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.LAST_PYMT_RECVD_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Last_Payment_Received}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.LAST_PYMT_RECVD_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.LAST_PYMT_RECVD_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <!--  Changed by Snehashis Ghosh on 08 Sep 09 the size of the column  -->
+    <apex:outputPanel rendered="{!IsBAL_DUE_AMTEnabled}"><td  width="45"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.BAL_DUE_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Balance_Due}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.BAL_DUE_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.BAL_DUE_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPAST_DUE_CMPGN_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.PAST_DUE_CMPGN_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Campaigns_Past_Due}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PAST_DUE_CMPGN_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PAST_DUE_CMPGN_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <!--  Changed by Snehashis Ghosh on 08 Sep 09  the Size of the column -->
+    <apex:outputPanel rendered="{!IsPAST_DUE_AMTEnabled}"><td  width="45"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.PAST_DUE_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Past_Due}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PAST_DUE_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.PAST_DUE_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsORD_HOLD_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.ORD_HOLD_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Order_Value}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.ORD_HOLD_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.ORD_HOLD_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsMRKT_TOP_SLR_LANG_KEYEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.MRKT_TOP_SLR_LANG_KEY__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Seller_Status}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.MRKT_TOP_SLR_LANG_KEY__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.MRKT_TOP_SLR_LANG_KEY__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsMIN_PRSNL_SLS_REQD_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.MIN_PRSNL_SLS_REQD_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Personal_Sales_Qual_Rpt}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MIN_PRSNL_SLS_REQD_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MIN_PRSNL_SLS_REQD_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsNET_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.NET_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Net_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.NET_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.NET_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsMULT_ORD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.MULT_ORD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Orders_submitted}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MULT_ORD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MULT_ORD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_TOTAL_ORD_RCVDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_TOTAL_ORD_RCVD__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Active_Downline}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_TOTAL_ORD_RCVD__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_TOTAL_ORD_RCVD__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCUST_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.CUST_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Customers_Served}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.CUST_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.CUST_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsSLS_ZONE_CDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.SLS_ZONE_CD__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Zone}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.SLS_ZONE_CD__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.SLS_ZONE_CD__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLDRSHP_TITL_LVL_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LDRSHP_TITL_LVL_NBR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Current_Title}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_TITL_LVL_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_TITL_LVL_NBR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTOTAL_TAR_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.TOTAL_TAR_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.At_Risk}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_TAR_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_TAR_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCMPGN_OF_UDATE_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.CMPGN_OF_UDATE_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Nbr_of_Campaigns}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.CMPGN_OF_UDATE_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.CMPGN_OF_UDATE_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTOTAL_CTT_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.TOTAL_CTT_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Performing_at_Next_Level}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_CTT_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_CTT_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTOTAL_PRMOTD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.TOTAL_PRMOTD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Promoted_Last_Campaign}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_PRMOTD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_PRMOTD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_GRP_APPT_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_GRP_APPT_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Appointments}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_APPT_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_APPT_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_NEW_REP_1ST_ORD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_NEW_REP_1ST_ORD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.1st_Order}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_NEW_REP_1ST_ORD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_NEW_REP_1ST_ORD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_GRP_RNSTMT_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_GRP_RNSTMT_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Reinstatements}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_RNSTMT_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_RNSTMT_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_GRP_RMOVL_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_GRP_RMOVL_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Removals}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_RMOVL_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_RMOVL_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_GRP_INHRTD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_GRP_INHRTD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Inherited}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_INHRTD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_INHRTD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTOTAL_GENRTN_1_STF_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Current_Downline}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsGENRTN_1_GRP_TITL_CHNG_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.GENRTN_1_GRP_TITL_CHNG_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Downline_Change_from_Last_Campaign}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.GENRTN_1_GRP_TITL_CHNG_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.GENRTN_1_GRP_TITL_CHNG_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTOTAL_GRP_TITL_CHNG_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.TOTAL_GRP_TITL_CHNG_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Downline_Change_from_Last_Campaign}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_GRP_TITL_CHNG_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_GRP_TITL_CHNG_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsAVG_AWRD_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.AVG_AWRD_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Average_Award_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.AVG_AWRD_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.AVG_AWRD_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_GRP_AVG_CUST_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_GRP_AVG_CUST_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Average_Customers}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_AVG_CUST_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_AVG_CUST_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLDRSHP_PRGRM_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LDRSHP_PRGRM_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Leadership}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_PRGRM_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_PRGRM_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsINACTV_CMPGN_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.INACTV_CMPGN_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Nbr_of_Campaigns_with_no_order}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.INACTV_CMPGN_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.INACTV_CMPGN_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsCC_GRP_AWRD_SLS_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Group_Award_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsGENRTN_1_GRP_ORD_RCVD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.GENRTN_1_GRP_ORD_RCVD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.1st_Generation_Active_Downline}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.GENRTN_1_GRP_ORD_RCVD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.GENRTN_1_GRP_ORD_RCVD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTOTAL_GRP_ADDS_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_Sales__r.TOTAL_GRP_ADDS_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Additions}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_GRP_ADDS_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_Sales__r.TOTAL_GRP_ADDS_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPATD_CERTFCTN_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.PATD_CERTFCTN_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.PATD_Certified}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_P_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.PATD_CERTFCTN_LVL_P_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Certified_P}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_P_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_P_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_A_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.PATD_CERTFCTN_LVL_A_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Certified_A}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_A_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_A_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_T_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.PATD_CERTFCTN_LVL_T_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Certified_T}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_T_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_T_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_D_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.PATD_CERTFCTN_LVL_D_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Certified_D}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_D_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.PATD_CERTFCTN_LVL_D_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLDRSHP_LOA_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LDRSHP_LOA_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Leadership_Association}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_LOA_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_LOA_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsREP_APPT_CMPGN_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.REP_APPT_CMPGN_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Appointment_Campaign}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.REP_APPT_CMPGN_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.REP_APPT_CMPGN_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsREP_RMOVL_CMPGN_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.REP_RMOVL_CMPGN_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Removal_Campaign}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.REP_RMOVL_CMPGN_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.REP_RMOVL_CMPGN_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsREP_RNSTMT_CMPGN_NREnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.REP_RNSTMT_CMPGN_NR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Reinstatement_Campaign}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.REP_RNSTMT_CMPGN_NR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.REP_RNSTMT_CMPGN_NR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLDRSHP_TITL_PROMTD_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LDRSHP_TITL_PROMTD_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Promoted}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_TITL_PROMTD_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_TITL_PROMTD_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLDRSHP_TAR_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LDRSHP_TAR_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.At_Risk}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_TAR_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_TAR_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsLDRSHP_CTT_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.LDRSHP_CTT_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Performing_at_Next_Level}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_CTT_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.LDRSHP_CTT_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsBRCHR_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.BRCHR_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Brochures_Purchased}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.BRCHR_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.BRCHR_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <!-- 
+    <apex:outputPanel rendered="{!IsLDRSHP_SLS_AIDS_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Group_sales__r.LDRSHP_SLS_AIDS_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Demo_Items_Purchased}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Group_sales__r.LDRSHP_SLS_AIDS_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Group_sales__r.LDRSHP_SLS_AIDS_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    -->
+    <apex:outputPanel rendered="{!IsDEMO_ITEM_ORDRD_CNTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.DEMO_ITEM_ORDRD_CNT__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Demo_Items_Purchased}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.DEMO_ITEM_ORDRD_CNT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.DEMO_ITEM_ORDRD_CNT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsMY_BUS_MRKT_TAG_1_AMTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.MY_BUS_MRKT_TAG_1_AMT__c')" action="{!sortReport}"><apex:outputText value="{!mktTag1Label}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MY_BUS_MRKT_TAG_1_AMT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MY_BUS_MRKT_TAG_1_AMT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsMY_BUS_MRKT_TAG_3_TXTEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.MY_BUS_MRKT_TAG_3_TXT__c')" action="{!sortReport}"><apex:outputText value="{!mktTag3Label}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MY_BUS_MRKT_TAG_3_TXT__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.MY_BUS_MRKT_TAG_3_TXT__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsTERR_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Representative__r.TERR_IND__c')" action="{!sortReport}"><apex:outputText value="{!$Label.Territory_Code}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Representative__r.TERR_IND__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Representative__r.TERR_IND__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+    <apex:outputPanel rendered="{!IsFIRST_ORD_INDEnabled}"><td  width="100"><apex:commandLink onClick="setSortColumn('Personal_Sales__r.FIRST_ORDER_INDICATOR__c')" action="{!sortReport}"><apex:outputText value="{!$Label.X1st_Order_Award_Sales}"/></apex:commandLink><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_up.gif')}" rendered="{!AND(currSort='Personal_Sales__r.FIRST_ORDER_INDICATOR__c',IsAscending)}"/><apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/sort_down.gif')}" rendered="{!AND(currSort='Personal_Sales__r.FIRST_ORDER_INDICATOR__c',NOT(IsAscending))}"/></td></apex:outputPanel>
+
+                                            </tr>
+                            </table>
+                            </apex:outputPanel>
+                            </td>
+                        </tr>
+                    </table>                    
+            <div class="table_with_scrolls" style="height:385px;width:985px">
+            <apex:outputPanel rendered="{!NOT(zoneSelErr)}">
+                    <table width="950" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="5"> </td>
+                            <td>
+                            <table width="950" border="0" cellpadding="0" cellspacing="0">
+                                <apex:repeat value="{!reportRows}" var="rptRow">
+                                <tr class="{!IF(rptRow.oddRow,'display_row_odd','display_row_even')}">
+                                    <td class="data_cell" align="center" valign="middle" width="20">
+                                        <apex:inputCheckbox id="repSelCBox" value="{!rptRow.selected}"/>
+
+                                    </td>
+                                    <apex:outputPanel rendered="{!userProfile='Avon Leader'}">
+                                    <td class="data_cell" width="20">
+                                        
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/gen1.gif')}" rendered="{!rptRow.DownlineGenNbr='I'}"/>
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/gen2.gif')}" rendered="{!rptRow.DownlineGenNbr='II'}"/>
+                                        <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/gen3.gif')}" rendered="{!rptRow.DownlineGenNbr='III'}"/>
+                                    </td>
+                                    </apex:outputPanel>
+                                    <td class="data_cell" align="left" width="180">
+                                        <a href="/apex/RepDetail?pgId=100&acctNbr={!rptRow.row.MRKT_ACCT_KEY__c}&retPgId=3">{!rptRow.row.Representative__r.FirstName} {!rptRow.row.Representative__r.LastName}</a>
+                                        <apex:outputPanel rendered="{!LEN(rptRow.row.Representative__r.Phone)>0}">
+                                            
+
+                                            {!$Label.Home_Phone}:{!rptRow.row.Representative__r.Phone} 
+                                        </apex:outputPanel>
+                                     
+                                            
+                                    </td>
+                                    <td class="data_cell" align="right" valign="top" width="20">
+                                    <a href="#" onmouseover="showRepInfo('{!rptRow.row.Representative__r.Name}',
+                                                                         '{!rptRow.row.Representative__r.TERR_IND__c}',
+                                                                         '{!rptRow.row.ACCT_NR__c}',
+                                                                         '{!rptRow.row.Representative__r.SLS_ZONE_CD__c}',
+                                                                         '{!rptRow.row.Representative__r.Phone}',
+                                                                         '{!rptRow.row.Representative__r.Email}',
+                                                                         '{!rptRow.title}',
+                                                                         '{!rptRow.DownlineGenNbr}',
+                                                                         '{!rptRow.sellerSts}',
+                                                                         '{!rptRow.row.Representative__r.LOA_NR__c}',
+                                                                         '{!rptRow.row.Representative__r.LDRSHP_LOA_NR__c}',
+                                                                         '{!rptRow.row.Representative__r.Birthday__c}',
+                                                                         '{!rptRow.row.UPLN_GENRTN_1_FULL_NM__c}',
+                                                                         '{!rptRow.UplineAcctNbr}', 
+                                                                         '{!rptRow.UplineLdrPhone}')"
+                                                          onmouseout="UnTip()">
+                                            <apex:image value="{!URLFOR($Resource.AvonSiteAssets,'images/infoicon.gif')}" width="15" height="15"/>
+                                        </a>  
+                                    </td>
+<apex:outputPanel rendered="{!IsOPERTNL_CMPGN_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.OPERTNL_CMPGN_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMIN_TO_EARN_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_sales__r.MIN_PRSNL_SLS_REQD_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLOA_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.LOA_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsBirthdayEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.Birthday__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_APPT_DTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.REP_APPT_DT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsRTURN_AWRD_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.RTURN_AWRD_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsRTURN_NET_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.RTURN_NET_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPercent_of_YTD_Net_SalesEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.Percent_of_YTD_Net_Sales__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPercent_of_Current_Net_SalesEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.Percent_of_Current_Net_Sales__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsORD_SRCE_DESC_TXTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.ORD_SRCE_DESC_TXT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsAVG_MULT_ORD_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.AVG_MULT_ORD_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsYTD_NET_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.YTD_NET_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsYTD_AWRD_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.YTD_AWRD_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsAWRD_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.AWRD_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPRSNL_QLFR_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.PRSNL_QLFR_SLS_AMT__c}"/></td></apex:outputPanel>
+<!--  <apex:outputPanel rendered="{!IsNC_PRSNL_QLFR_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.NC_PRSNL_QLFR_SLS_AMT__c}"/></td></apex:outputPanel>--> 
+
+<apex:outputPanel rendered="{!IsPENDNG_ORD_AMTEnabled}"><td  width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.PENDNG_ORD_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPENDNG_ORD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.PENDNG_ORD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_DTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.LAST_PYMT_RECVD_DT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLAST_PYMT_RECVD_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.LAST_PYMT_RECVD_AMT__c}"/></td></apex:outputPanel>
+<!-- Changed by Snehashis Ghosh on 08 Sep 2009 -->
+<apex:outputPanel rendered="{!IsBAL_DUE_AMTEnabled}"><td class="data_cell" width="45"><apex:outputField value="{!rptRow.row.Personal_Sales__r.BAL_DUE_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPAST_DUE_CMPGN_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.PAST_DUE_CMPGN_CNT__c}"/></td></apex:outputPanel>
+<!-- Changed by Snehashis Ghosh on 08 Sep 2009 -->
+<apex:outputPanel rendered="{!IsPAST_DUE_AMTEnabled}"><td class="data_cell" width="45"><apex:outputField value="{!rptRow.row.Personal_Sales__r.PAST_DUE_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsORD_HOLD_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.ORD_HOLD_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMRKT_TOP_SLR_LANG_KEYEnabled}"><td class="data_cell" width="100"><apex:outputText value="{!rptRow.sellerSts}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMIN_PRSNL_SLS_REQD_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.MIN_PRSNL_SLS_REQD_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsNET_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.NET_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMULT_ORD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.MULT_ORD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_TOTAL_ORD_RCVDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_TOTAL_ORD_RCVD__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCUST_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.CUST_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsSLS_ZONE_CDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.SLS_ZONE_CD__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TITL_LVL_NREnabled}"><td class="data_cell" width="100"><apex:outputText value="{!rptRow.title}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_TAR_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_TAR_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCMPGN_OF_UDATE_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.CMPGN_OF_UDATE_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_CTT_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_CTT_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_PRMOTD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_PRMOTD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_APPT_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_APPT_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_NEW_REP_1ST_ORD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_NEW_REP_1ST_ORD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_RNSTMT_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_RNSTMT_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_RMOVL_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_RMOVL_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_INHRTD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_INHRTD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GENRTN_1_STF_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_GENRTN_1_STF_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsGENRTN_1_GRP_TITL_CHNG_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.GENRTN_1_GRP_TITL_CHNG_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GRP_TITL_CHNG_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_GRP_TITL_CHNG_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsAVG_AWRD_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.AVG_AWRD_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_AVG_CUST_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_AVG_CUST_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_PRGRM_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_PRGRM_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsINACTV_CMPGN_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.INACTV_CMPGN_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsCC_GRP_AWRD_SLS_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.CC_GRP_AWRD_SLS_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsGENRTN_1_GRP_ORD_RCVD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.GENRTN_1_GRP_ORD_RCVD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTOTAL_GRP_ADDS_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_Sales__r.TOTAL_GRP_ADDS_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_P_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_P_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_A_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_A_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_T_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_T_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsPATD_CERTFCTN_LVL_D_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.PATD_CERTFCTN_LVL_D_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_LOA_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_LOA_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_APPT_CMPGN_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.REP_APPT_CMPGN_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_RMOVL_CMPGN_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.REP_RMOVL_CMPGN_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsREP_RNSTMT_CMPGN_NREnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.REP_RNSTMT_CMPGN_NR__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TITL_PROMTD_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_TITL_PROMTD_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_TAR_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_TAR_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsLDRSHP_CTT_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.LDRSHP_CTT_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsBRCHR_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.BRCHR_CNT__c}"/></td></apex:outputPanel>
+<!--  <apex:outputPanel rendered="{!IsLDRSHP_SLS_AIDS_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Group_sales__r.LDRSHP_SLS_AIDS_CNT__c}"/></td></apex:outputPanel>-->
+<apex:outputPanel rendered="{!IsDEMO_ITEM_ORDRD_CNTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.DEMO_ITEM_ORDRD_CNT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMY_BUS_MRKT_TAG_1_AMTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.MY_BUS_MRKT_TAG_1_AMT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMY_BUS_MRKT_TAG_3_TXTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.MY_BUS_MRKT_TAG_3_TXT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsMY_BUS_MRKT_TAG_4_TXTEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.MY_BUS_MRKT_TAG_4_TXT__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsTERR_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Representative__r.TERR_IND__c}"/></td></apex:outputPanel>
+<apex:outputPanel rendered="{!IsFIRST_ORD_INDEnabled}"><td class="data_cell" width="100"><apex:outputField value="{!rptRow.row.Personal_Sales__r.FRST_ORD_IND__c}"/></td></apex:outputPanel>
+                                </tr>
+                            </apex:repeat>
+                                    
+                            </table>
+                            </td>
+                        </tr>
+                    </table>                    
+            </apex:outputPanel>
+            </div>
+                    <script type="text/javascript">
+                        var geneFilter = document.getElementById('{!$Component.theform.geneFilter}');
+                        if(geneFilter!=null){
+                            geneFilter.remove(0);
+                        }
+                        geneFilter = document.getElementById('{!$Component.theform.geneFilter1}');
+                        if(geneFilter!=null){
+                            geneFilter.remove(0);
+                        }
+                        
+                    </script>
+                </apex:form>
+                <apex:outputPanel rendered="{!printSelected}">
+                 <script type="text/javascript">
+                    var repPrintUrl= '/apex/RepDetail?pgId=100&acctNbr={!printAcctNbrs}&print=1';
+                    window.open(repPrintUrl,'printDetail','width=920,height=500');
+                 </script>
+                
+                </apex:outputPanel>
+            </apex:define>
+    </apex:composition>
+</apex:page>
+                            	

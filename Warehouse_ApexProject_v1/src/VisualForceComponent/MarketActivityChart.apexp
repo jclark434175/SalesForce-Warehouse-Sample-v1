@@ -1,0 +1,60 @@
+<apex:component controller="MarketActivityChartController">
+    <apex:attribute name="chartCurrent" type="String" assignTo="{!chartCurrent}" 
+        required="true" description="Title for Current Campaign" />
+    <apex:attribute name="chartPrior" type="String" assignTo="{!chartPrior}" 
+        required="true" description="Title for Prior Campaign" />
+    <apex:attribute name="ldrLbl" type="String" assignTo="{!ldrLbl}" 
+        required="true" description="Label for leadership" />
+    <apex:attribute name="nonLdrLbl" type="String" assignTo="{!nonLdrLbl}" 
+        required="true" description="Label for non-leadership" />
+    <apex:attribute name="salesTitle" type="String" assignTo="{!salesTitle}" 
+        required="true" description="Title for Sales Chart" />
+    <apex:attribute name="repTitle" type="String" assignTo="{!repTitle}" 
+        required="true" description="Title for Rep Participation Chart" />
+    <apex:attribute name="ordersTitle" type="String" assignTo="{!ordersTitle}" 
+        required="true" description="Title for Orders Chart" />
+    <apex:attribute name="salesOrgActivity" type="Sales_Org_Activity__c" assignTo="{!salesOrgActivity}" 
+        required="true" description="Data record for the charts" />
+        <!-- 
+            Component Body
+         -->
+         
+        <apex:outputText value="{!initialize}"/>
+         <table width="100%" border="0" cellspacing="0" cellpadding="1">
+            <tr>
+                <td>
+                    <apex:outputPanel rendered="{!LEN(repChartData)>0}">
+                        <c:ColumnChart jsondata="{!repChartData}"
+                                       title="{!repTitle}"
+                                       is3d="true"/>
+                    </apex:outputPanel>     
+                    
+                </td>
+         
+                <td>
+                    <apex:outputPanel rendered="{!LEN(ordersChartData)>0}">
+                        <c:ColumnChart jsondata="{!ordersChartData}"
+                                       title="{!ordersTitle}"
+                                       is3d="true"/>
+                    </apex:outputPanel>     
+                </td>
+        </tr>
+        <tr>
+                <td colspan="2">
+                    <apex:outputPanel rendered="{!LEN(salesChartData)>0}">
+                        <c:ColumnChart jsondata="{!salesChartData}"
+                                       title="{!salesTitle}"
+                                       width="500"
+                                       is3d="true"/>
+                    </apex:outputPanel>     
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+            </tr>
+            
+         </table>
+        
+
+</apex:component>
+                             	
